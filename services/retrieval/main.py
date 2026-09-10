@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="ClothStore Retrieval Service", lifespan=lifespan)
+app = FastAPI(title="LUXE Retrieval Service", lifespan=lifespan)
 
 logfire.configure(send_to_logfire="if-token-present", token=settings.logfire_write_token)
 logfire.instrument_fastapi(app)

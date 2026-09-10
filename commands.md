@@ -1,4 +1,4 @@
-# Deploying ClothStore to Google Cloud Run
+# Deploying LUXE to Google Cloud Run
 
 This is the hands‑on companion to [`docs/07-deployment.md`](docs/07-deployment.md).
 It walks through setting up the Google Cloud project so that the GitHub Actions
@@ -35,13 +35,13 @@ gcloud services enable \
 
 ## 2. Create the Artifact Registry repository
 
-The pipeline pushes images to a Docker repo called `clothstore`.
+The pipeline pushes images to a Docker repo called `luxe`.
 
 ```bash
-gcloud artifacts repositories create clothstore \
+gcloud artifacts repositories create luxe \
   --repository-format=docker \
   --location=us-central1 \
-  --description="ClothStore container images"
+  --description="LUXE container images"
 ```
 
 ---
@@ -51,10 +51,10 @@ gcloud artifacts repositories create clothstore \
 This is the identity the pipeline acts as.
 
 ```bash
-gcloud iam service-accounts create clothstore-deployer \
-  --display-name="ClothStore GitHub deployer"
+gcloud iam service-accounts create luxe-deployer \
+  --display-name="LUXE GitHub deployer"
 
-DEPLOYER="clothstore-deployer@YOUR_PROJECT_ID.iam.gserviceaccount.com"
+DEPLOYER="luxe-deployer@YOUR_PROJECT_ID.iam.gserviceaccount.com"
 
 # Grant exactly what the pipeline needs
 gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
@@ -116,7 +116,7 @@ gcloud iam workload-identity-pools providers describe github-provider \
 |--------|-------|
 | `GCP_PROJECT_ID` | `YOUR_PROJECT_ID` |
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | the provider resource name from step 4 |
-| `GCP_SERVICE_ACCOUNT_EMAIL` | `clothstore-deployer@YOUR_PROJECT_ID.iam.gserviceaccount.com` |
+| `GCP_SERVICE_ACCOUNT_EMAIL` | `luxe-deployer@YOUR_PROJECT_ID.iam.gserviceaccount.com` |
 | `MONGO_URI` | your MongoDB Atlas connection string |
 | `GROQ_API_KEY` | from console.groq.com |
 | `GOOGLE_CLIENT_ID` | OAuth client id (only if you want Google Sign‑In) |
@@ -153,15 +153,15 @@ each service needs to know the other's address. See
 Every deploy is a new Cloud Run **revision**. To roll back:
 
 ```bash
-gcloud run revisions list --service=clothstore-retrieval --region=us-central1
-gcloud run services update-traffic clothstore-retrieval \
+gcloud run revisions list --service=luxe-retrieval --region=us-central1
+gcloud run services update-traffic luxe-retrieval \
   --region=us-central1 --to-revisions=REVISION_NAME=100
 ```
 
 ## Changing a setting without redeploying code
 
 ```bash
-gcloud run services update clothstore-retrieval \
+gcloud run services update luxe-retrieval \
   --region=us-central1 \
   --update-env-vars "AGENT_MODEL_NAME=openai/gpt-oss-120b"
 ```

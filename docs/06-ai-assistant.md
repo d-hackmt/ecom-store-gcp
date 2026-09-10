@@ -59,6 +59,18 @@ safety model must not take chat offline. If the **agent itself** errors, the
 shopper gets a friendly "I ran into an issue, please try again" with the
 customer‑care number.
 
+## The pipeline
+
+All of the above — the guards, the agent run, the output guard, the response
+shaping — lives in one function, `run_chat(message)` in
+`backend/chatbot/pipeline.py`. It returns a plain dict
+(`{type, message, data}`) and never raises.
+
+`backend/routes/chatbot.py` is then just a three‑line HTTP wrapper around it.
+The standalone chatbot POC (branch `02-chatbot-poc`) calls the **same**
+`run_chat` from its own endpoint — one pipeline, two front doors. That is what
+makes "we just dropped the POC in" true at integration time.
+
 ## The agent
 
 `backend/chatbot/agent.py` defines:
@@ -70,10 +82,10 @@ customer‑care number.
   `keyword`, `min_price`, `max_price`. It builds a MongoDB query, runs it,
   shapes the results for the frontend, and stashes them on a per‑run object
   (`StoreDeps`). The agent's text reply is separate from the product list — the
-  endpoint reads the products off `StoreDeps`, not out of the model's words.
+  pipeline reads the products off `StoreDeps`, not out of the model's words.
 
 Example: *"do you have anything for kids?"* → the agent calls
-`search_products(category="kids")` → the endpoint returns
+`search_products(category="kids")` → the pipeline returns
 `{type: "products", message: "Here's what we have for kids!", data: [...]}`.
 
 ## The guardrails

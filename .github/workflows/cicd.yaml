@@ -6,9 +6,9 @@ on:
 
 env:
   REGION: us-central1
-  REPO: clothstore
-  INGESTION_SERVICE: clothstore-ingestion
-  RETRIEVAL_SERVICE: clothstore-retrieval
+  REPO: luxe
+  INGESTION_SERVICE: luxe-ingestion
+  RETRIEVAL_SERVICE: luxe-retrieval
 
 jobs:
   test:

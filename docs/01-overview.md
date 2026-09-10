@@ -1,8 +1,8 @@
 # 1 · Overview
 
-## What is ClothStore?
+## What is LUXE?
 
-ClothStore is a small but complete e‑commerce website for a clothing brand,
+LUXE is a small but complete e‑commerce website for a clothing brand,
 plus an **AI shopping assistant**. A visitor can:
 
 - Browse products in three categories: **Men, Women, Kids**.

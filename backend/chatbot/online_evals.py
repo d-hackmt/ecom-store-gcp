@@ -41,7 +41,7 @@ class ReplyLength(Evaluator):
 _quality_judge = OnlineEvaluator(
     evaluator=LLMJudge(
         rubric=(
-            "The reply is from ClothStore's shopping assistant. It is on-topic "
+            "The reply is from LUXE's shopping assistant. It is on-topic "
             "(clothing/shopping, or a natural greeting/identity answer, or a "
             "polite refusal pointing to customer care), never rude, and never "
             "invents specific product names, prices, or stock details."

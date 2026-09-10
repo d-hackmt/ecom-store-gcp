@@ -1,5 +1,5 @@
 """
-Pydantic Evals suite for the ClothStore shopping assistant (backend/routes/chatbot.py).
+Pydantic Evals suite for the LUXE shopping assistant (backend/chatbot/pipeline.py).
 
 Covers:
 - The agent actually calls the `search_products` tool for product queries — checked
@@ -22,16 +22,14 @@ from pydantic_evals.evaluators import Evaluator, EvaluatorContext, LLMJudge
 from pydantic_evals.evaluators.common import HasMatchingSpan
 from pydantic_evals.otel.span_tree import SpanQuery
 
-from ..routes.chatbot import chat_bot
+from ..chatbot.pipeline import run_chat
 from ..chatbot.guardrails import GUARDRAIL_BLOCKED_MESSAGE
 
 logfire.configure(send_to_logfire="if-token-present")
 logfire.instrument_pydantic_ai()
 
-
-async def run_chat(message: str) -> dict:
-    """Task function: runs a message through the real /chat pipeline (guardrails + agent)."""
-    return await chat_bot({"message": message})
+# `run_chat` (guards -> agent -> guard -> response dict) is the task function
+# passed to Dataset.evaluate_sync below.
 
 
 @dataclass

@@ -75,6 +75,11 @@ class Settings(BaseSettings):
     logfire_token: str | None = None
     logfire_api_key: str | None = None
 
+    # Attach the live pydantic-evals evaluators to the agent (see
+    # backend/chatbot/online_evals.py). On here; the standalone chatbot POC
+    # ships the same agent.py with this turned off.
+    online_evals_enabled: bool = True
+
     @property
     def logfire_write_token(self) -> str | None:
         return self.logfire_token or self.logfire_api_key

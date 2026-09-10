@@ -1,8 +1,7 @@
-# Runtime dependencies for ClothStore AI.
+# Runtime dependencies for LUXE.
 #
-# Unpinned — install the current compatible versions. `requirements.lock.txt`
-# holds a fully-pinned snapshot if you ever need a byte-for-byte reproducible
-# environment. Dev / test extras live in requirements-dev.txt.
+# Unpinned — install the current compatible versions. Dev / test extras live in
+# requirements-dev.txt.
 
 # --- Web framework ---
 fastapi
@@ -14,7 +13,7 @@ pydantic
 pydantic-settings                # typed configuration loaded from the environment / .env
 
 # --- Database ---
-pymongo
+pymongo[srv]
 
 # --- Authentication ---
 bcrypt                           # password hashing

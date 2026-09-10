@@ -1,6 +1,6 @@
 # Ingestion service — all write endpoints (product CRUD/bulk upload, auth,
 # cart writes, order placement). Build from the repo root:
-#   docker build -f services/ingestion/Dockerfile -t clothstore-ingestion .
+#   docker build -f services/ingestion/Dockerfile -t luxe-ingestion .
 FROM python:3.11-slim
 WORKDIR /app
 

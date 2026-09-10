@@ -17,7 +17,7 @@ backend/
     products_bulk.py    JSON bulk-add + Excel/zip upload
     orders.py          place order, order history
     cart.py            add / list / clear cart
-    chatbot.py         POST /chat  (orchestrates the AI — see doc 6)
+    chatbot.py         POST /chat  (thin HTTP layer — calls chatbot/pipeline.py; see doc 6)
     auth.py            is-admin, register, login
     google_auth.py     Google Sign-In
     profile.py         view/edit profile, avatar, delete account
@@ -26,10 +26,11 @@ backend/
     mongo.py        small reusable query fragments (case-insensitive match)
     passwords.py    bcrypt hash / verify
     users.py        turn a user document into a safe public object (never leak the hash)
-  chatbot/
+  chatbot/          the portable assistant package (kept in sync with the POC branch)
     agent.py        the Pydantic AI agent + its search_products tool
     guardrails.py   the two safety-model checks
-    online_evals.py background quality scoring on live chats
+    pipeline.py     run_chat(): guards -> agent -> guard -> response dict
+    online_evals.py background quality scoring on live chats (toggled by a setting)
 main.py            the monolith entry point
 services/
   ingestion/main.py   write-only entry point

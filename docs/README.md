@@ -1,6 +1,6 @@
-# ClothStore AI — Documentation
+# LUXE AI — Documentation
 
-ClothStore is an online clothing shop with an AI shopping assistant built in.
+LUXE is an online clothing shop with an AI shopping assistant built in.
 You browse Men / Women / Kids clothing, filter by price, add things to a cart,
 place an order with just an email, and — if you'd rather not click through
 filters — you can simply *ask* the assistant ("show me men's shirts under

@@ -6,7 +6,7 @@
 flowchart TB
     U["🧑 Shopper's browser"]
 
-    subgraph APP["ClothStore application"]
+    subgraph APP["LUXE application"]
         FE["Frontend<br/>(static JS + CSS)"]
         RE["Read endpoints<br/>list products, view cart,<br/>order history, chat"]
         WR["Write endpoints<br/>add to cart, place order,<br/>register, admin product CRUD"]
@@ -98,7 +98,7 @@ service's address at deploy time and sends every write there.
 
 ## Identity — how the app knows who you are
 
-ClothStore keeps this deliberately simple. There are **no session tokens**.
+LUXE keeps this deliberately simple. There are **no session tokens**.
 
 ```mermaid
 flowchart TD

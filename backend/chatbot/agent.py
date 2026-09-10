@@ -1,6 +1,6 @@
 """
 The Pydantic AI shopping agent: system prompt, dependencies, and its
-`search_products` tool for querying the ClothStore MongoDB catalog.
+`search_products` tool for querying the LUXE MongoDB catalog.
 
 Routed through Portkey when configured (see utils/llm_gateway.py), otherwise
 talks to Groq directly.
@@ -12,7 +12,6 @@ from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
-from .online_evals import online_evaluation
 from ..config import REFUSAL_MESSAGE, settings
 from ..database import products_collection
 from ..utils.images import resolve_image_field
@@ -27,7 +26,7 @@ from ..utils.llm_gateway import (
 RAW_AGENT_MODEL = settings.agent_model_name
 
 SYSTEM_PROMPT = (
-    "You are a friendly shopping assistant for ClothStore — an online clothing store. "
+    "You are a friendly shopping assistant for LUXE — an online clothing store. "
     "The store has 3 categories: men, women, and kids."
     "\n\n"
     "RULES:\n"
@@ -52,11 +51,20 @@ if is_portkey_configured():
 else:
     agent_model = f"groq:{RAW_AGENT_MODEL}"
 
+# Live evaluation is optional (see backend/chatbot/online_evals.py). Imported only
+# when enabled, so the standalone chatbot POC can ship this file unchanged without
+# depending on pydantic-evals.
+_capabilities = []
+if settings.online_evals_enabled:
+    from .online_evals import online_evaluation
+
+    _capabilities = [online_evaluation]
+
 agent = Agent(
     agent_model,
     name="chatbot",
     deps_type=StoreDeps,
-    capabilities=[online_evaluation],
+    capabilities=_capabilities,
     system_prompt=SYSTEM_PROMPT,
 )
 
@@ -70,7 +78,7 @@ def search_products(
     min_price: Optional[int] = None,
 ) -> str:
     """
-    Search the ClothStore product database.
+    Search the LUXE product database.
 
     Args:
         category: Filter by category — one of 'men', 'women', 'kids', 'accessories'.

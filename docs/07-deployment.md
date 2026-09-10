@@ -1,6 +1,6 @@
 # 7 · Deployment
 
-In production, ClothStore runs on **Google Cloud** as **two containers on Cloud
+In production, LUXE runs on **Google Cloud** as **two containers on Cloud
 Run**, deployed automatically by **GitHub Actions** on every push to `main`.
 
 For the step‑by‑step "set up the Google Cloud project" commands, see
@@ -12,7 +12,7 @@ used and *why*.
 | Service | What it does here |
 |---------|-------------------|
 | **Cloud Run** | Runs the two container images. Fully managed: no VMs to patch, scales up under load, scales to **zero** when idle (you pay per request). Each service gets a public HTTPS URL. |
-| **Artifact Registry** | A private Docker image store. The pipeline pushes `ingestion` and `retrieval` images here, tagged with the Git commit hash, in a repository called `clothstore` in region `us-central1`. |
+| **Artifact Registry** | A private Docker image store. The pipeline pushes `ingestion` and `retrieval` images here, tagged with the Git commit hash, in a repository called `luxe` in region `us-central1`. |
 | **IAM – Workload Identity Federation** | Lets GitHub Actions prove its identity to Google Cloud **without a stored key**. GitHub's short‑lived OIDC token is exchanged for a short‑lived Google access token at deploy time. Nothing secret is kept in the repo. |
 | **IAM – Service Account** | The identity the deploy *acts as*. It needs three roles: **Cloud Run Admin** (deploy services), **Artifact Registry Writer** (push images), **Service Account User** (let Cloud Run run as itself). |
 
@@ -73,9 +73,9 @@ sequenceDiagram
     Note over GH: job 2 — deploy (only if tests pass)
     GH->>GH: authenticate to Google Cloud (Workload Identity Federation)
     GH->>AR: build + push ingestion:(sha) and retrieval:(sha)
-    GH->>CR: deploy clothstore-ingestion  (CORS = * for now)
+    GH->>CR: deploy luxe-ingestion  (CORS = * for now)
     CR-->>GH: ingestion URL
-    GH->>CR: deploy clothstore-retrieval  (INGESTION_SERVICE_URL = ingestion URL)
+    GH->>CR: deploy luxe-retrieval  (INGESTION_SERVICE_URL = ingestion URL)
     CR-->>GH: retrieval URL
     GH->>CR: update ingestion  (CORS = retrieval URL)
     end
@@ -110,7 +110,7 @@ ingestion's `ALLOWED_ORIGINS` to retrieval's real URL.
 
 ## Running it yourself without Google Cloud
 
-You don't need any of the above to run ClothStore. Two options:
+You don't need any of the above to run LUXE. Two options:
 
 ```bash
 # Monolith — one process, everything on port 8000
