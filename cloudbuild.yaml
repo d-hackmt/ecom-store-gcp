@@ -27,7 +27,7 @@ steps:
       - 'GOOGLE_CLIENT_ID=${_GOOGLE_CLIENT_ID}'
 
 substitutions:
-  _GOOGLE_CLIENT_ID: '604130206163-glk232l2ur9os8o16tq90ok62haorc3o.apps.googleusercontent.com'
+  _GOOGLE_CLIENT_ID: '604130206163-3jk00n1pp845h9m02uf8gbldlbper63g.apps.googleusercontent.com'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA'
