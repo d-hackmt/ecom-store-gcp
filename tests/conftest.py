@@ -5,6 +5,13 @@ The suite never touches the real MongoDB Atlas cluster and never calls real
 Groq/Portkey APIs: the product collection is an in-memory fake and the LLM
 boundary is mocked. `pytest` stays fast, free, and safe to run on every push.
 """
+import os
+
+# Importing the chatbot constructs a pydantic-ai Agent, which needs GROQ_API_KEY
+# to be *present* (any value) even though every real call is mocked. Set a dummy
+# one so the offline suite runs with zero configuration.
+os.environ.setdefault("GROQ_API_KEY", "test-key-unused")
+
 import re
 import copy
 
