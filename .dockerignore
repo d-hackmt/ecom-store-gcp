@@ -1,80 +1,40 @@
-ecpyenv
+# Not needed in the image
+.git/
+.github/
+.claude/
+CLAUDE.md
+README.md
+commands.md
+docs/
+tests/
+githooks/
+pytest.ini
+requirements-dev.txt
 
-
-# Dependencies
-node_modules/
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
 
-# Python virtual environment
-myenv/
-venv/
-ENV/
-env/
+# Virtual environments
 clothenv/
+.venv/
+venv/
 
-# Git metadata (never needed in the image, can be large)
-.git/
-
-# Environment variables
+# Environment variables (injected at deploy time)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
-# IDE
+# Caches / logs / scratch
+.pytest_cache/
+.mypy_cache/
+.logfire/
+*.log
+dump/
+experiments/
+
+# Editor / OS
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# OS
 .DS_Store
 Thumbs.db
-
-# Build outputs
-dist/
-build/
-*.egg-info/
-*.egg
-
-# Jupyter Notebook
-.ipynb_checkpoints/
-
-# Uploads (user-generated content)
-uploads/*
-!uploads/.gitkeep
-
-# Logs
-*.log
-npm-debug.log*
-
-# Package files
-*.tar.gz
-*.zip
-
-# Coverage reports
-htmlcov/
-.coverage
-coverage/
-
-# mypy
-.mypy_cache/
-
-.logfire
-
-experiments\.logfire
-
-# Pytest
-.pytest_cache/
-
-# Frontend
-Frontend/node_modules/
-Frontend/dist/
-Frontend/.env
-
-shopenv/

@@ -43,8 +43,7 @@ explicitly asked. Never make a change on a demo branch expecting it to flow back
   Match the docstring density and style of the file you're editing.
 - **Imports:** relative within `backend/` (`from ..config import settings`).
 - **AI libraries:** verify class/kwarg names against the installed version before
-  using them (`pydantic-ai` / `pydantic-evals` move fast — see
-  `.claude/history/` for what was checked and when).
+  using them — `pydantic-ai` / `pydantic-evals` move fast.
 - **Tests:** every bug fix gets a test. The suite is fully offline — DB is an
   in-memory fake (`tests/conftest.py`), the LLM boundary is mocked. No network.
 - **No dead code, no redundancy.** Removed code goes away, not commented out.
