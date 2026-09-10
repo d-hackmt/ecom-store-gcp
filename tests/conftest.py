@@ -6,6 +6,13 @@ Groq/Portkey API calls: every collection is swapped for an in-memory fake,
 and chatbot tests mock the LLM boundary. This keeps `pytest` fast, free, and
 safe to run on every push (see githooks/pre-push).
 """
+import os
+
+# Importing the chatbot constructs a pydantic-ai Agent, which needs GROQ_API_KEY
+# to be *present* (any value) even though every real call is mocked. Set a dummy
+# one so the offline suite runs with zero configuration.
+os.environ.setdefault("GROQ_API_KEY", "test-key-unused")
+
 import re
 import copy
 
