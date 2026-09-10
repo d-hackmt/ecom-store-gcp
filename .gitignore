@@ -1,87 +1,47 @@
-ecpyenv
-
-
-# Dependencies
-node_modules/
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 
-# Python virtual environment
-myenv/
+# Virtual environments
+clothenv/
+.venv/
 venv/
-ENV/
-env/
 
 # Environment variables
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
-# IDE
+# Editor / OS
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
-
-# OS
 .DS_Store
 Thumbs.db
 
-# Build outputs
+# Build output
 dist/
 build/
 *.egg-info/
-*.egg
 
-# Jupyter Notebook
-.ipynb_checkpoints/
-
-# Uploads (user-generated content)
-uploads/*
-!uploads/.gitkeep
+# Test & type-check caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # Logs
 *.log
-npm-debug.log*
 
-# Package files
-*.tar.gz
-*.zip
+# Pydantic Logfire local cache
+.logfire/
 
-# Coverage reports
-htmlcov/
-.coverage
-coverage/
+# Jupyter
+.ipynb_checkpoints/
 
-# mypy
-.mypy_cache/
-
-.logfire
-
-experiments\.logfire
-
-# Pytest
-.pytest_cache/
-
-# Frontend
-Frontend/node_modules/
-Frontend/dist/
-Frontend/.env
-
-shopenv/
-clothenv/
-
-cloudbuild.yaml
-
-# Refactor recovery storage (transient — see .claude/refactor/)
+# Local scratch — never committed
 dump/
-
-# Local scratch notebooks (contain ad-hoc connection strings — never commit)
 experiments/
-
-
