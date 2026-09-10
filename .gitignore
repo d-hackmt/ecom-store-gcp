@@ -42,6 +42,5 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
-# Local scratch — never committed
-dump/
+# Local scratch notebooks — never committed
 experiments/
