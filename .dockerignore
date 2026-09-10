@@ -30,7 +30,6 @@ venv/
 .mypy_cache/
 .logfire/
 *.log
-dump/
 experiments/
 
 # Editor / OS
