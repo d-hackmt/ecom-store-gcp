@@ -1,4 +1,4 @@
-# LUXE AI — Documentation
+# LUXE — Documentation
 
 LUXE is an online clothing shop with an AI shopping assistant built in.
 You browse Men / Women / Kids clothing, filter by price, add things to a cart,
@@ -11,6 +11,7 @@ are new:
 
 | # | Page | What it covers |
 |---|------|----------------|
+| — | [Story](STORY.md) | How this repo's three branches tell a Forward-Deployed-AI-Engineer story |
 | 1 | [Overview](01-overview.md) | What the project is, the full technology stack, and why each piece is there |
 | 2 | [Architecture](02-architecture.md) | How all the parts fit together, the two ways to run it, and what happens on a request |
 | 3 | [Frontend](03-frontend.md) | The storefront the shopper sees — how the pages, routing and state work |

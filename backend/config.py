@@ -46,9 +46,8 @@ class Settings(BaseSettings):
     # --- Database ---
     mongo_uri: str | None = None
 
-    # --- LLM providers ---
+    # --- LLM provider ---
     groq_api_key: str | None = None
-    tavily_api_key: str | None = None  # reserved; no web-search tool is wired up yet
 
     # --- Portkey LLM gateway (optional; falls back to calling Groq directly) ---
     portkey_api_key: str = ""

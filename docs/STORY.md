@@ -78,8 +78,9 @@ production-grade.
   - *Live:* `backend/chatbot/online_evals.py` attaches Pydantic Evals
     evaluators to the agent. After every real chat, in the background, they
     score the reply (non-empty? on-topic? invented no details?) and stream the
-    scores to Logfire. Toggled by `settings.online_evals_enabled` — the one
-    line that differs from the POC's `agent.py`.
+    scores to Logfire. `agent.py` attaches them when
+    `settings.online_evals_enabled` is true — the default here, and the only
+    difference from the POC, which defaults it off and doesn't ship this file.
   - *Offline:* `backend/evals/chatbot_evals.py` — a fixed set of example
     conversations run against the real agent on demand.
 - **Full observability** — `logfire.instrument_fastapi` / `instrument_pydantic_ai`
@@ -103,6 +104,7 @@ an addition, not a rewrite.
 - `01-store-only` and `02-chatbot-poc` are **frozen snapshots** — each is "what
   the client saw at that stage". They are derived from `main` by removing code,
   never maintained in parallel, so a change on `main` never forces edits on them.
-- The overlap that matters — the `chatbot/` package — is kept identical between
-  `02-chatbot-poc` and `main` (minus the one eval-flag line), so the "we just
-  dropped the POC in" claim is literally true.
+- The overlap that matters — `agent.py`, `guardrails.py`, `pipeline.py` — is
+  **byte-for-byte identical** between `02-chatbot-poc`'s `app/chatbot/` and
+  `main`'s `backend/chatbot/`. The eval toggle lives in `config.py`, not in the
+  package. So the "we just dropped the POC in" claim is literally true.
