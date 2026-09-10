@@ -1,0 +1,10 @@
+# Development & test dependencies. Installs the runtime set too.
+#   uv pip install -r requirements-dev.txt
+
+-r requirements.txt
+
+pytest
+
+# Used only by the Jupyter notebooks in experiments/ (patches the running event
+# loop so `agent.run_sync` works inside a notebook cell). Not imported by the app.
+nest-asyncio

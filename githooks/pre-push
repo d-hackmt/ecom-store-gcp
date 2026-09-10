@@ -1,0 +1,25 @@
+#!/bin/sh
+# Runs the pytest suite before allowing a push. Bypass with `git push --no-verify`
+# if you really need to (not recommended).
+#
+# Activated via: git config core.hooksPath githooks
+
+if [ -x "./clothenv/Scripts/python.exe" ]; then
+    PYTHON="./clothenv/Scripts/python.exe"
+elif [ -x "./clothenv/bin/python" ]; then
+    PYTHON="./clothenv/bin/python"
+else
+    PYTHON="python"
+fi
+
+echo "Running tests before push..."
+"$PYTHON" -m pytest -q
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Tests failed — push aborted. Fix the failures, or 'git push --no-verify' to skip (not recommended)."
+    exit 1
+fi
+
+echo "✅ All tests passed."
+exit 0

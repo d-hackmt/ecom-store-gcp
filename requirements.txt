@@ -1,0 +1,33 @@
+# Runtime dependencies for ClothStore AI.
+#
+# Unpinned — install the current compatible versions. `requirements.lock.txt`
+# holds a fully-pinned snapshot if you ever need a byte-for-byte reproducible
+# environment. Dev / test extras live in requirements-dev.txt.
+
+# --- Web framework ---
+fastapi
+uvicorn
+python-multipart                 # multipart/form-data uploads (product + avatar images)
+
+# --- Data & validation ---
+pydantic
+pydantic-settings                # typed configuration loaded from the environment / .env
+
+# --- Database ---
+pymongo
+
+# --- Authentication ---
+bcrypt                           # password hashing
+google-auth                      # Google Sign-In: verifies the ID-token signature
+
+# --- Spreadsheet ingestion ---
+openpyxl                         # bulk product upload (.xlsx workbook)
+
+# --- AI shopping assistant ---
+pydantic-ai-slim[openai,groq]    # agent + OpenAI-compatible / Groq model providers
+pydantic-evals                   # offline eval suite + live online evaluators
+groq                             # guardrail models, called directly (AsyncGroq)
+openai                           # guardrail models via the Portkey gateway (AsyncOpenAI)
+
+# --- Observability ---
+logfire[fastapi]                 # tracing + FastAPI / Pydantic / Pydantic-AI instrumentation

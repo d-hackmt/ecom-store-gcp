@@ -1,0 +1,20 @@
+services:
+  retrieval:
+    build:
+      context: .
+      dockerfile: services/retrieval/Dockerfile
+    env_file: .env
+    environment:
+      ALLOWED_ORIGINS: "*"
+    ports:
+      - "8000:8000"
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: services/ingestion/Dockerfile
+    env_file: .env
+    environment:
+      ALLOWED_ORIGINS: "*"
+    ports:
+      - "8001:8001"
