@@ -1,32 +1,23 @@
-# Runtime dependencies for LUXE.
+# Runtime dependencies for the LUXE shopping-assistant POC.
 #
 # Unpinned — install the current compatible versions. Dev / test extras live in
 # requirements-dev.txt.
 
-# --- Web framework ---
+# --- Web ---
 fastapi
 uvicorn
-python-multipart                 # multipart/form-data uploads (product + avatar images)
 
-# --- Data & validation ---
-pydantic
-pydantic-settings                # typed configuration loaded from the environment / .env
+# --- Config ---
+pydantic-settings
+python-dotenv                    # load_dotenv() in app/config.py
 
-# --- Database ---
+# --- Database (read-only access to the client's product catalog) ---
 pymongo[srv]
 
-# --- Authentication ---
-bcrypt                           # password hashing
-google-auth                      # Google Sign-In: verifies the ID-token signature
-
-# --- Spreadsheet ingestion ---
-openpyxl                         # bulk product upload (.xlsx workbook)
-
-# --- AI shopping assistant ---
+# --- The assistant ---
 pydantic-ai-slim[openai,groq]    # agent + OpenAI-compatible / Groq model providers
-pydantic-evals                   # offline eval suite + live online evaluators
 groq                             # guardrail models, called directly (AsyncGroq)
 openai                           # guardrail models via the Portkey gateway (AsyncOpenAI)
 
 # --- Observability ---
-logfire[fastapi]                 # tracing + FastAPI / Pydantic / Pydantic-AI instrumentation
+logfire[fastapi]                 # tracing (no-op without a token)

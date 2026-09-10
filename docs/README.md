@@ -1,33 +1,75 @@
-# LUXE AI — Documentation
+# The POC — how it works
 
-LUXE is an online clothing shop with an AI shopping assistant built in.
-You browse Men / Women / Kids clothing, filter by price, add things to a cart,
-place an order with just an email, and — if you'd rather not click through
-filters — you can simply *ask* the assistant ("show me men's shirts under
-₹2000") and it fetches real products from the catalog for you.
+The client, LUXE, runs an online clothing store (see the `01-store-only`
+branch). They want customers to be able to *ask* for products in plain English
+instead of clicking through category and price filters.
 
-These docs explain the whole thing in plain language. Read them in order if you
-are new:
+This POC proves that works, in isolation, against their real catalog — before
+touching their codebase.
 
-| # | Page | What it covers |
-|---|------|----------------|
-| 1 | [Overview](01-overview.md) | What the project is, the full technology stack, and why each piece is there |
-| 2 | [Architecture](02-architecture.md) | How all the parts fit together, the two ways to run it, and what happens on a request |
-| 3 | [Frontend](03-frontend.md) | The storefront the shopper sees — how the pages, routing and state work |
-| 4 | [Backend](04-backend.md) | The API — every endpoint, and how it splits into a "reads" service and a "writes" service |
-| 5 | [Database](05-database.md) | MongoDB's job, the four collections, and what a document in each looks like |
-| 6 | [AI Assistant](06-ai-assistant.md) | The shopping chatbot: how it turns a sentence into a database query, and the safety guardrails around it |
-| 7 | [Deployment](07-deployment.md) | Google Cloud: every GCP service used, the container images, and the automated deploy pipeline |
-| 8 | [Glossary](08-glossary.md) | Every technical term used in these docs, in one sentence each |
+## The flow
 
-## The one-paragraph version
+```mermaid
+flowchart TD
+    M["POST /chat  { message }"] --> EMPTY{empty?}
+    EMPTY -->|yes| P0["'Please type a message!'"]
+    EMPTY -->|no| IG
 
-A **browser** loads a plain JavaScript storefront. It talks to a **FastAPI**
-(Python) backend over a small JSON API. The backend keeps all its data —
-products, carts, orders, user accounts — in **MongoDB**. When a shopper talks to
-the assistant, the backend hands the message to a **Pydantic AI** agent running
-on **Groq**'s language models; the agent calls one tool, `search_products`,
-which runs a MongoDB query and returns matches. Two lightweight **guardrail**
-models check the message on the way in and the reply on the way out. Everything
-is traced with **Pydantic Logfire**. In production the app runs as two
-containers on **Google Cloud Run**.
+    subgraph IG["Input guards (run together)"]
+        G1["Llama Prompt Guard 2<br/>prompt-injection / jailbreak?"]
+        G2["gpt-oss-safeguard-20b + INPUT_POLICY<br/>unsafe / prompt-extraction?"]
+    end
+
+    IG --> FLAG1{flagged?}
+    FLAG1 -->|yes| REF["polite refusal + customer-care number"]
+    FLAG1 -->|no| AGENT
+
+    AGENT["Agent runs on the message"] --> TOOL{product query?}
+    TOOL -->|yes| SEARCH["search_products(category, keyword, min_price, max_price)"]
+    SEARCH --> DB[("MongoDB (read-only)")]
+    DB --> CONFIRM["agent writes a short confirmation"]
+    TOOL -->|no| CHAT["agent replies in plain text"]
+
+    CONFIRM --> OG
+    CHAT --> OG
+    OG["Output guard:<br/>gpt-oss-safeguard-20b + OUTPUT_POLICY"]
+    OG --> FLAG2{flagged?}
+    FLAG2 -->|yes| REF
+    FLAG2 -->|no| OUT
+
+    OUT{found products?}
+    OUT -->|yes| RP["{ type: 'products', message, data: [ ... ] }"]
+    OUT -->|no| RT["{ type: 'text', message }"]
+```
+
+All of this is one function: `run_chat(message)` in `app/chatbot/pipeline.py`.
+It returns a plain dict and never raises. Guardrail calls **fail open** — if a
+Groq call errors it is logged and the request continues, so a safety-model
+hiccup never takes chat down.
+
+## The pieces
+
+| Piece | File | Job |
+|-------|------|-----|
+| **Agent** | `app/chatbot/agent.py` | A Pydantic AI agent on a Groq model with **one tool**, `search_products`, which builds and runs a MongoDB query and stashes the matches on a per-run object. |
+| **Guardrails** | `app/chatbot/guardrails.py` | Llama Prompt Guard 2 screens the incoming message for injection; gpt-oss-safeguard-20b checks it against a policy, and checks the reply too. |
+| **Pipeline** | `app/chatbot/pipeline.py` | `run_chat` — ties the above together into the response the UI renders. |
+| **Gateway** | `app/utils/llm_gateway.py` | If `PORTKEY_API_KEY` is set, all Groq calls route through Portkey; otherwise they go direct. Behaviour is identical either way. |
+
+## Models
+
+All on Groq, all overridable via env vars:
+
+| Setting | Default | Used for |
+|---------|---------|----------|
+| `AGENT_MODEL_NAME` | `openai/gpt-oss-20b` | the assistant |
+| `PROMPT_GUARD_MODEL_NAME` | `meta-llama/llama-prompt-guard-2-86m` | injection detection |
+| `GUARD_MODEL_NAME` | `openai/gpt-oss-safeguard-20b` | the policy checks |
+
+## What integration adds (on the `main` branch)
+
+- This `app/chatbot/` package, dropped into `backend/chatbot/` unchanged.
+- A thin `POST /chat` route calling the same `run_chat`.
+- The chat widget on every storefront page.
+- **Evals** — live evaluators on every real chat, plus an offline suite.
+- Full request tracing.
