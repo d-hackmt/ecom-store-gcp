@@ -21,6 +21,8 @@ steps:
       - '--allow-unauthenticated'
       - '--port'
       - '8000'
+      - '--set-secrets'
+      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$COMMIT_SHA'
