@@ -21,6 +21,13 @@ steps:
       - '--allow-unauthenticated'
       - '--port'
       - '8000'
+      - '--memory'
+      - '1Gi'
+      - '--cpu'
+      - '1'
+      - '--cpu-boost'
+      - '--timeout'
+      - '300'
       - '--set-secrets'
       - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest'
 
