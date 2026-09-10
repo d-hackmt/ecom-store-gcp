@@ -33,19 +33,54 @@ ERROR: (gcloud.run.deploy) The user-provided container failed to start and
 listen on the port defined provided by the PORT=8000 environment variable
 ```
 
-Added to the deploy step:
+Both runtime values are pulled from Secret Manager so nothing sensitive sits in
+a committed file:
 
 ```
       - '--set-secrets'
-      - 'MONGO_URI=MONGO_URI:latest'
-      - '--set-env-vars'
-      - 'GOOGLE_CLIENT_ID=${_GOOGLE_CLIENT_ID}'
-
-substitutions:
-  _GOOGLE_CLIENT_ID: '<public client id>'
+      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest'
 ```
 
-Requires a one-time setup in the GCP project: create a Secret Manager secret
-named `MONGO_URI`, and grant the Cloud Run runtime service account
+One-time GCP setup: create Secret Manager secrets `MONGO_URI` and
+`GOOGLE_CLIENT_ID`, and grant the Cloud Run runtime service account
 (`<projectNumber>-compute@developer.gserviceaccount.com`) the
 `roles/secretmanager.secretAccessor` role.
+
+### `Frontend/src/pages/profile/googleSignIn.js` — harden the client-id guard
+
+The guard skipped setup only when the id contained `REPLACE_WITH`, but the
+`.env.example` placeholder is `YOUR_GOOGLE_CLIENT_ID`, which slipped through and
+let Google init run with a bogus id. Now it requires a real-looking id:
+
+```
+if (!clientId || !clientId.endsWith('.apps.googleusercontent.com')) return;
+```
+
+### `commands.md` — console-only deploy guide
+
+Rewritten so every GCP step is done through the Cloud Console website, no
+`gcloud` CLI:
+
+- Enable **Secret Manager API**; new Phase 2 section to create the `MONGO_URI`
+  and `GOOGLE_CLIENT_ID` secrets (and add new versions after a rotation).
+- Synced the sample `cloudbuild.yaml` with the real one (`store-repo` / `store`
+  names, the `--set-secrets` line); Artifact Registry repo name aligned to
+  `store-repo`.
+- Phase 4 IAM: added **Secret Manager Secret Accessor** to the runtime service
+  account's roles.
+- Phase 7 rewritten — config now comes from Secret Manager via `cloudbuild.yaml`,
+  not hand-added plaintext env vars on the Cloud Run service.
+
+## Security — exposed credentials
+
+Commit `606cc48` committed the real `MONGO_URI` (with the DB password) to
+`.env.example` and was pushed to `origin/01-store`. A later commit reverted the
+file to placeholders, but the value remains in git history on GitHub.
+
+- **Required:** rotate the MongoDB Atlas password, then update the `MONGO_URI`
+  Secret Manager secret and local `.env`.
+- The old Google OAuth client (`...glk232...`) was deleted; a new one replaced
+  it. A client id is not a secret (browsers receive it), but it is no longer
+  stored in `cloudbuild.yaml` either — it lives in the `GOOGLE_CLIENT_ID` secret.
+- History rewrite (BFG / `git filter-repo` + force push) is optional; rotation is
+  what actually neutralises the leak.

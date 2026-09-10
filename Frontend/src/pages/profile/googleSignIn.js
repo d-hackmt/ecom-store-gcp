@@ -36,7 +36,7 @@ export async function setupGoogleSignIn(rerender) {
   if (!container) return;
 
   const clientId = await getGoogleClientId();
-  if (!clientId || clientId.includes('REPLACE_WITH')) return;
+  if (!clientId || !clientId.endsWith('.apps.googleusercontent.com')) return;
 
   try {
     await loadGoogleScript();

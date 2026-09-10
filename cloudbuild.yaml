@@ -22,12 +22,7 @@ steps:
       - '--port'
       - '8000'
       - '--set-secrets'
-      - 'MONGO_URI=MONGO_URI:latest'
-      - '--set-env-vars'
-      - 'GOOGLE_CLIENT_ID=${_GOOGLE_CLIENT_ID}'
-
-substitutions:
-  _GOOGLE_CLIENT_ID: '604130206163-3jk00n1pp845h9m02uf8gbldlbper63g.apps.googleusercontent.com'
+      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA'
