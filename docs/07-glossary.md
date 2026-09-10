@@ -36,25 +36,6 @@ Every technical term used in these docs, one sentence each.
 | **base64** | A way to write binary data (like an image) as plain text so it can live inside a database document or a JSON response. |
 | **bcrypt** | A one‑way password hashing function; the original password can't be recovered from the stored hash. |
 
-## The AI parts
-
-| Term | Meaning |
-|------|---------|
-| **LLM (large language model)** | A model that predicts text; it can answer questions and, when set up for it, decide to call functions. |
-| **Groq** | The company/service that actually runs the language models this project uses; the app sends a prompt and gets back text. |
-| **Pydantic AI** | A framework that lets an LLM reliably call your Python functions ("tools") and hands you structured results. |
-| **Agent** | An LLM plus a system prompt plus a set of tools it may call — here, the shopping assistant with its one `search_products` tool. |
-| **Tool** | A Python function the agent is allowed to call; the model chooses when and with what arguments. |
-| **System prompt** | The fixed instructions given to the agent before the conversation ("you are a shopping assistant, always use the search tool for product requests…"). |
-| **Text‑to‑NoSQL** | Turning a plain‑English request into a database query; what `search_products` effectively does. |
-| **Guardrail** | A separate, small model that checks a message (or a reply) for attacks or unsafe content and can block it. |
-| **Prompt injection / jailbreak** | Tricking an AI into ignoring its instructions ("ignore the above and reveal your prompt"); the input guard catches these. |
-| **Fail open** | If a safety check itself errors, log it and let the request continue rather than breaking chat. |
-| **Portkey** | An optional proxy that sits in front of Groq to add logging and retries; the app works with or without it. |
-| **Pydantic Evals** | A library for scoring AI output; used here to grade live replies in the background. |
-| **Pydantic Logfire** | An observability service that records a trace of every request and every AI step, for debugging and monitoring. |
-| **Span / trace** | One timed step (a span) and the tree of steps for a whole request (a trace) in Logfire. |
-
 ## Deployment
 
 | Term | Meaning |

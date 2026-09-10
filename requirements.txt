@@ -1,4 +1,4 @@
-# Runtime dependencies for LUXE.
+# Runtime dependencies for LUXE (store, no AI).
 #
 # Unpinned — install the current compatible versions. Dev / test extras live in
 # requirements-dev.txt.
@@ -21,12 +21,3 @@ google-auth                      # Google Sign-In: verifies the ID-token signatu
 
 # --- Spreadsheet ingestion ---
 openpyxl                         # bulk product upload (.xlsx workbook)
-
-# --- AI shopping assistant ---
-pydantic-ai-slim[openai,groq]    # agent + OpenAI-compatible / Groq model providers
-pydantic-evals                   # offline eval suite + live online evaluators
-groq                             # guardrail models, called directly (AsyncGroq)
-openai                           # guardrail models via the Portkey gateway (AsyncOpenAI)
-
-# --- Observability ---
-logfire[fastapi]                 # tracing + FastAPI / Pydantic / Pydantic-AI instrumentation

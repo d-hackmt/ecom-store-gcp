@@ -9,12 +9,12 @@ the files exactly as they are on disk; there is no build step, no framework, no
 
 ```
 Frontend/
-  index.html          the page shell — three empty boxes + one <script>
+  index.html          the page shell — two empty boxes + one <script>
   src/
     main.js           startup: mount the shell, then route
     router.js         reads the URL, shows the right page
     style.css         all styling
-    components/       reusable UI: Header, Hero, Chatbot
+    components/       reusable UI: Header, Hero
     pages/            one file per screen: Home, ProductDetail, Cart, Profile, Admin
     services/         everything that is not UI: state, API calls, navigation
     utils/            tiny helpers: escapeHtml, image placeholder
@@ -23,13 +23,12 @@ Frontend/
 `index.html` is almost empty on purpose:
 
 ```html
-<div id="site-header"></div>   <!-- the top bar, filled by mountHeader()   -->
-<main id="app"></main>          <!-- the current page, filled by the router  -->
-<div id="chatbot-root"></div>   <!-- the chat widget, filled by mountChatbot() -->
+<div id="site-header"></div>   <!-- the top bar, filled by mountHeader() -->
+<main id="app"></main>          <!-- the current page, filled by the router -->
 ```
 
-The header and the chatbot are mounted **once** and stay put. Navigation only
-replaces the contents of `<main id="app">`.
+The header is mounted **once** and stays put. Navigation only replaces the
+contents of `<main id="app">`.
 
 ## Routing — the URL is the state
 
@@ -74,10 +73,10 @@ UI files never call `fetch` directly. Everything goes through `services/`:
 
 | File | Responsibility |
 |------|----------------|
-| `services/state.js` | One plain object, `state`, holding everything the UI needs to remember: the session email, `isAdmin`, the cart count, the current category, chat messages, the admin form draft. Plus `login()` / `logout()` helpers that also update `localStorage`. |
+| `services/state.js` | One plain object, `state`, holding everything the UI needs to remember: the session email, `isAdmin`, the cart count, the current category, the admin form draft. Plus `login()` / `logout()` helpers that also update `localStorage`. |
 | `services/nav.js` | `navigate(hash)` and `currentRoute()` — the only place the URL hash is read or written. |
 | `services/api/http.js` | **`request()`** — the single wrapper around `fetch`. It picks the right base URL (reads → same origin, writes → the ingestion service), sends the body as JSON or FormData, checks the response, and **throws `Error(<message from the backend>)`** on any failure. |
-| `services/api/*.js` | One small module per area (`auth`, `products`, `cart`, `orders`, `chat`). Each function is one line: call `request()` with the right path. |
+| `services/api/*.js` | One small module per area (`auth`, `products`, `cart`, `orders`). Each function is one line: call `request()` with the right path. |
 | `services/api_v2.js` | A "barrel" that re‑exports all the API functions, so pages can `import { fetchProducts, addToCart } from '../services/api_v2.js'`. |
 | `services/cartCount.js` | The **only** place `state.cartItemCount` is written. `refreshCartCount()` fetches the cart, sums the quantities, and repaints the header. |
 | `services/cartActions.js` | The shared "Add to Cart" button behaviour used by both the grid and the product page. |
@@ -106,11 +105,3 @@ try {
 | **Cart** (`pages/Cart.js`) | Fetches the cart and the catalog in parallel, joins them for prices/images, shows the total. "Clear Cart" empties it; "Buy All Now" places one order per line then clears the cart. |
 | **Profile** (`pages/Profile.js` + `pages/profile/*`) | Logged out: login / register forms + the Google button. Logged in: avatar upload, an "Edit Profile" panel (needs the current password), order history, and a "Danger Zone" to delete the account. |
 | **Admin** (`pages/Admin.js` + `pages/admin/*`) | Only reachable when `state.isAdmin` is true. Add/edit a product form, a product list with Edit/Delete, a "Delete All" button, and the Excel + zip bulk importer. |
-
-## The chatbot widget
-
-`components/Chatbot.js` lives in `#chatbot-root`, so it is available on **every**
-page. Its state (open/closed, messages, the text being typed) is in the shared
-`state` object. When something changes it re‑renders **only itself** — it does
-not touch the rest of the page. Product cards inside a chat reply are clickable
-and open the product page.

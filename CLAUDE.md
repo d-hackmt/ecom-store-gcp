@@ -1,63 +1,53 @@
-# CLAUDE.md — LUXE
+# CLAUDE.md — LUXE (`01-store-only`)
 
-## What this repo is
+## What this branch is
 
-An online clothing store with an AI shopping assistant, built as a
-Forward-Deployed-AI-Engineer story told across three branches. Read
-[`docs/STORY.md`](docs/STORY.md) first.
+The LUXE online clothing store **with no AI** — FastAPI + MongoDB + a
+vanilla-JS storefront, cart, orders, accounts, Google sign-in, admin.
+
+It is **branch 1 of 3**, a frozen snapshot in a Forward-Deployed-AI-Engineer
+story. The `main` branch has the full picture (`docs/STORY.md` there).
 
 | Branch | Scope |
 |--------|-------|
-| `main` | **← this branch.** The full integrated product: store + AI + guardrails + evals + tracing. The only living branch. |
-| `01-store-only` | The plain store, no AI. A frozen snapshot, derived from `main` by removing all AI code. |
-| `02-chatbot-poc` | The standalone chatbot POC. A frozen snapshot, derived from `main`. |
+| `main` | Full integrated product: store + AI + guardrails + evals. Source of truth. |
+| `01-store-only` | **← this branch.** The plain store. Frozen. |
+| `02-chatbot-poc` | The standalone chatbot POC. Frozen. |
 
-**Branch rule:** `main` is the source of truth. `01` and `02` are derived and
-frozen. A fix goes into `main` first; the demo branches are only re-derived if
-explicitly asked. Never make a change on a demo branch expecting it to flow back.
+## Scope rule — do not add AI here
 
-## Architecture (this branch)
+This branch must stay AI-free. **Do not** add `pydantic-ai`, `pydantic-evals`,
+`groq`, `openai`, `logfire`, a `backend/chatbot/` package, a `/chat` route, or a
+chat widget. Anything like that belongs on `main`. If a task seems to need AI
+here, it's the wrong branch — stop and check with the user.
 
-- `backend/` — the FastAPI app. One package, imported by three entrypoints:
-  - `main.py` — the monolith (storefront + every endpoint). This is the default.
-  - `services/retrieval/main.py` — read endpoints + storefront only.
-  - `services/ingestion/main.py` — write endpoints only.
+`main` is the source of truth. This branch is derived and frozen; a change here
+does not flow back.
+
+## Architecture
+
+- `backend/` — the FastAPI app. One package, three entrypoints:
+  - `main.py` — the monolith (storefront + every endpoint). Default.
+  - `services/retrieval/main.py` — read endpoints + storefront.
+  - `services/ingestion/main.py` — write endpoints.
 - `backend/routes/*.py` — each module exposes `read_router` + `write_router`;
-  entrypoints mount the half they serve. A new endpoint is declared once.
-- `backend/chatbot/` — the portable assistant package (kept in sync with
-  `02-chatbot-poc`):
-  - `agent.py` — the Pydantic AI agent + its `search_products` tool.
-  - `guardrails.py` — the two Groq safety-model checks.
-  - `pipeline.py` — `run_chat(message) -> dict`: guards → agent → guard → shape.
-    Both `backend/routes/chatbot.py` and the POC's endpoint call this.
-  - `online_evals.py` — live evaluators, attached only when
-    `settings.online_evals_enabled` (on here, off in the POC).
-- `backend/config.py` — the **only** place `.env` is read. One typed `Settings`.
+  entrypoints mount the half they serve.
+- `backend/config.py` — the only place `.env` is read. One typed `Settings`
+  (`MONGO_URI`, `GOOGLE_CLIENT_ID`, plus split-mode CORS settings).
 - `Frontend/` — vanilla JS ES modules, no build step. `escapeHtml()` on every
   interpolation of user/DB text.
 
 ## Conventions
 
-- **Python:** Pydantic v2 only (`model_dump()`, `model_config`, no `class Config`).
-  FastAPI `lifespan=` (never `@app.on_event`). `datetime.now(timezone.utc)`.
-  Match the docstring density and style of the file you're editing.
-- **Imports:** relative within `backend/` (`from ..config import settings`).
-- **AI libraries:** verify class/kwarg names against the installed version before
-  using them (`pydantic-ai` / `pydantic-evals` move fast — see
-  `.claude/history/` for what was checked and when).
-- **Tests:** every bug fix gets a test. The suite is fully offline — DB is an
-  in-memory fake (`tests/conftest.py`), the LLM boundary is mocked. No network.
-- **No dead code, no redundancy.** Removed code goes away, not commented out.
+- Pydantic v2 only. FastAPI `lifespan=`. `datetime.now(timezone.utc)`.
+- Relative imports within `backend/`.
+- Every bug fix gets a test. The suite is fully offline (in-memory DB fake,
+  `tests/conftest.py`). No network.
+- No dead code, no redundancy. Removed code goes away, not commented out.
 
 ## Commands
 
 ```bash
-python main.py                       # run the monolith on :8000
-pytest                               # full offline suite
-python -m backend.evals.chatbot_evals   # offline eval suite (needs real GROQ_API_KEY + MONGO_URI)
+python main.py     # run the monolith on :8000
+pytest             # full offline suite
 ```
-
-## Not in scope on this branch
-
-Nothing is off-limits here — `main` is the full system. (The *demo* branches
-have their own `CLAUDE.md` with scope limits.)

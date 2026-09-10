@@ -10,7 +10,7 @@ def test_expected_route_prefixes_are_registered():
     schema = main.app.openapi()
     paths = schema["paths"].keys()
 
-    expected_prefixes = ["/products", "/orders", "/cart", "/chat", "/auth"]
+    expected_prefixes = ["/products", "/orders", "/cart", "/auth"]
     for prefix in expected_prefixes:
         assert any(p.startswith(prefix) for p in paths), f"No routes registered under {prefix}"
 

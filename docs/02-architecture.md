@@ -8,14 +8,12 @@ flowchart TB
 
     subgraph APP["LUXE application"]
         FE["Frontend<br/>(static JS + CSS)"]
-        RE["Read endpoints<br/>list products, view cart,<br/>order history, chat"]
+        RE["Read endpoints<br/>list products, view cart,<br/>order history"]
         WR["Write endpoints<br/>add to cart, place order,<br/>register, admin product CRUD"]
-        BR["backend/ — shared code<br/>models · config · db · auth · utils · chatbot"]
+        BR["backend/ — shared code<br/>models · config · db · auth · utils"]
     end
 
     DB[("MongoDB Atlas")]
-    LLM["Groq<br/>(language models)"]
-    LOG["Pydantic Logfire"]
     GID["Google Identity"]
 
     U <--> FE
@@ -24,21 +22,18 @@ flowchart TB
     RE --> BR
     WR --> BR
     BR <--> DB
-    BR -->|chat / guardrails| LLM
-    BR -.trace.-> LOG
     FE <-->|sign-in| GID
     BR -->|verify token| GID
 ```
 
 Everything the shopper sees is the **frontend**. It only knows how to make small
 JSON requests. All the logic lives in the **backend**, which is the only thing
-that talks to the database and to Groq.
+that talks to the database.
 
 The backend's endpoints fall into two groups:
 
 - **Reads** — anything that only *looks at* data: listing products, viewing one
-  product, reading a cart, reading order history, and the chatbot (it only
-  queries the database, it never changes it).
+  product, reading a cart, reading order history.
 - **Writes** — anything that *changes* data: adding to a cart, placing an order,
   registering / logging in, editing a profile, and all the admin product
   operations.
@@ -85,7 +80,7 @@ Two FastAPI processes:
 
 | Service | Port | Serves | Why separate |
 |---------|------|--------|--------------|
-| **retrieval** | 8000 | the frontend + all read endpoints + the chatbot | Browsing is the heavy, bursty traffic. This service can scale up on its own. |
+| **retrieval** | 8000 | the frontend + all read endpoints | Browsing is the heavy, bursty traffic. This service can scale up on its own. |
 | **ingestion** | 8001 | all write endpoints | Writes are rarer and can scale independently. |
 
 Both containers share the **same MongoDB database** — there is no data split,
@@ -123,7 +118,7 @@ works differently: Google gives the browser a signed token, the backend
 verifies Google's signature (using the `google-auth` library), and trusts the
 email inside — no password involved.
 
-## What happens on a request — three walkthroughs
+## What happens on a request — two walkthroughs
 
 ### Loading the home page
 
@@ -163,34 +158,4 @@ sequenceDiagram
     end
     API-->>B: {message: "Item added to cart"}
     B->>API: GET /cart/(id)   (refresh the header badge)
-```
-
-### Asking the assistant
-
-See [AI Assistant](06-ai-assistant.md) for the full version. Short form:
-
-```mermaid
-sequenceDiagram
-    participant B as Browser
-    participant API as Backend
-    participant G as Guardrails
-    participant A as Agent
-    participant DB as MongoDB
-
-    B->>API: POST /chat {message}
-    API->>G: is this message safe / not an attack?
-    alt flagged
-        API-->>B: polite refusal
-    else ok
-        API->>A: run the agent on the message
-        A->>DB: search_products(filters)  (if it's a product query)
-        DB-->>A: matches
-        A-->>API: short confirmation text
-        API->>G: is the reply safe?
-        alt reply flagged
-            API-->>B: polite refusal
-        else ok
-            API-->>B: {type: "products", message, data: [...]}
-        end
-    end
 ```

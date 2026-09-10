@@ -1,5 +1,5 @@
 # Retrieval service — all read endpoints (product listing, profile/cart/order
-# lookups, chatbot) plus the Frontend and uploaded files. Build from the repo root:
+# lookups) plus the Frontend. Build from the repo root:
 #   docker build -f services/retrieval/Dockerfile -t luxe-retrieval .
 FROM python:3.11-slim
 WORKDIR /app

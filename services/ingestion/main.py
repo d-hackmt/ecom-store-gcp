@@ -10,7 +10,6 @@ API split; all three share backend/ and the same MongoDB Atlas cluster.
 """
 from contextlib import asynccontextmanager
 
-import logfire
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,7 +17,6 @@ from backend.routes import products, products_bulk, orders, cart, auth, google_a
 from backend.config import settings
 from backend.database import ensure_indexes
 
-# The chatbot is read-only and lives on the retrieval service, so it is not imported here.
 WRITE_MODULES = (products, products_bulk, orders, cart, auth, google_auth, profile)
 
 
@@ -30,10 +28,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="LUXE Ingestion Service", lifespan=lifespan)
-
-logfire.configure(send_to_logfire="if-token-present", token=settings.logfire_write_token)
-logfire.instrument_fastapi(app)
-logfire.instrument_pydantic()
 
 # The frontend (served by the retrieval service, a different origin once split
 # across containers/ports) calls straight into this service for writes.

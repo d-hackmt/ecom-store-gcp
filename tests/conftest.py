@@ -1,10 +1,9 @@
 """
 Shared pytest fixtures.
 
-The suite never touches the real MongoDB Atlas cluster or makes real
-Groq/Portkey API calls: every collection is swapped for an in-memory fake,
-and chatbot tests mock the LLM boundary. This keeps `pytest` fast, free, and
-safe to run on every push (see githooks/pre-push).
+The suite never touches the real MongoDB Atlas cluster: every collection is
+swapped for an in-memory fake. This keeps `pytest` fast, free, and safe to run
+on every push (see githooks/pre-push).
 """
 import re
 import copy
@@ -147,7 +146,6 @@ def fake_db(monkeypatch):
     import backend.routes.profile as profile_routes
     import backend.routes.orders as orders_routes
     import backend.routes.cart as cart_routes
-    import backend.chatbot.agent as agent_module
 
     monkeypatch.setattr(auth_core, "users_collection", users)
     monkeypatch.setattr(products_routes, "products_collection", products)
@@ -158,7 +156,6 @@ def fake_db(monkeypatch):
     monkeypatch.setattr(profile_routes, "cart_collection", cart)
     monkeypatch.setattr(orders_routes, "orders_collection", orders)
     monkeypatch.setattr(cart_routes, "cart_collection", cart)
-    monkeypatch.setattr(agent_module, "products_collection", products)
 
     return {"users": users, "products": products, "orders": orders, "cart": cart}
 

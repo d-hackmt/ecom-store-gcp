@@ -1,8 +1,7 @@
 """
 Retrieval service — every read-only endpoint: product listing/detail,
-admin/profile lookups, cart/order history, and the AI shopping assistant (the
-chatbot only ever queries MongoDB, never writes). Also serves the frontend,
-since browsing is read-heavy.
+admin/profile lookups, cart/order history. Also serves the frontend, since
+browsing is read-heavy.
 
 It mounts the `read_router` of each shared route module (see backend/routes/).
 Nothing is duplicated or reimplemented — the same route functions back the
@@ -11,16 +10,15 @@ API split; all three share backend/ and the same MongoDB Atlas cluster.
 """
 from contextlib import asynccontextmanager
 
-import logfire
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from backend.routes import products, orders, cart, chatbot, auth, google_auth, profile
+from backend.routes import products, orders, cart, auth, google_auth, profile
 from backend.config import settings
 from backend.database import ensure_indexes
 
-READ_MODULES = (products, orders, cart, chatbot, auth, google_auth, profile)
+READ_MODULES = (products, orders, cart, auth, google_auth, profile)
 
 
 @asynccontextmanager
@@ -31,10 +29,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="LUXE Retrieval Service", lifespan=lifespan)
-
-logfire.configure(send_to_logfire="if-token-present", token=settings.logfire_write_token)
-logfire.instrument_fastapi(app)
-logfire.instrument_pydantic()
 
 # The frontend served here calls out to the ingestion service (a different
 # origin once split across containers/ports) for every write.

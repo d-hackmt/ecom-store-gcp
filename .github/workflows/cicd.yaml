@@ -26,11 +26,7 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Run test suite
-        # GROQ_API_KEY is needed just to *import* the app: backend/chatbot/guardrails.py
-        # constructs a Groq client at module import time. The tests themselves mock every
-        # DB and LLM call, so nothing real is contacted.
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        # The suite mocks every DB call, so nothing real is contacted.
         run: pytest -q
 
   deploy:
@@ -78,7 +74,7 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "MONGO_URI=${{ secrets.MONGO_URI }},GROQ_API_KEY=${{ secrets.GROQ_API_KEY }},LOGFIRE_API_KEY=${{ secrets.LOGFIRE_API_KEY }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},PORTKEY_API_KEY=${{ secrets.PORTKEY_API_KEY }},PORTKEY_GROQ_PROVIDER=${{ secrets.PORTKEY_GROQ_PROVIDER }},ALLOWED_ORIGINS=*"
+            --set-env-vars "MONGO_URI=${{ secrets.MONGO_URI }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},ALLOWED_ORIGINS=*"
 
       - name: Get ingestion URL
         id: ingestion_url
@@ -91,7 +87,7 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "MONGO_URI=${{ secrets.MONGO_URI }},GROQ_API_KEY=${{ secrets.GROQ_API_KEY }},LOGFIRE_API_KEY=${{ secrets.LOGFIRE_API_KEY }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},PORTKEY_API_KEY=${{ secrets.PORTKEY_API_KEY }},PORTKEY_GROQ_PROVIDER=${{ secrets.PORTKEY_GROQ_PROVIDER }},INGESTION_SERVICE_URL=${{ steps.ingestion_url.outputs.url }},ALLOWED_ORIGINS=*"
+            --set-env-vars "MONGO_URI=${{ secrets.MONGO_URI }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},INGESTION_SERVICE_URL=${{ steps.ingestion_url.outputs.url }},ALLOWED_ORIGINS=*"
 
       - name: Get retrieval URL
         id: retrieval_url

@@ -66,7 +66,7 @@ sequenceDiagram
     rect rgb(235,248,255)
     Note over GH: job 1 — test
     GH->>GH: pip install -r requirements-dev.txt
-    GH->>GH: pytest -q     (all DB/LLM calls are mocked)
+    GH->>GH: pytest -q     (all DB calls are mocked)
     end
 
     rect rgb(255,243,224)
@@ -102,11 +102,8 @@ ingestion's `ALLOWED_ORIGINS` to retrieval's real URL.
 | `GCP_PROJECT_ID` | which Google Cloud project to deploy into |
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | the Workload Identity provider resource name |
 | `GCP_SERVICE_ACCOUNT_EMAIL` | the deploy service account |
-| `MONGO_URI` | database connection (passed to both services + the test job) |
-| `GROQ_API_KEY` | language‑model calls |
+| `MONGO_URI` | database connection (passed to both services) |
 | `GOOGLE_CLIENT_ID` | Google Sign‑In |
-| `LOGFIRE_API_KEY` | tracing (optional) |
-| `PORTKEY_API_KEY`, `PORTKEY_GROQ_PROVIDER` | route model calls through Portkey (optional) |
 
 ## Running it yourself without Google Cloud
 

@@ -1,12 +1,10 @@
 from contextlib import asynccontextmanager
 
-import logfire
 import uvicorn
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from backend.routes import products, products_bulk, orders, cart, chatbot, auth, google_auth, profile
-from backend.config import settings
+from backend.routes import products, products_bulk, orders, cart, auth, google_auth, profile
 from backend.database import ensure_indexes
 
 
@@ -17,22 +15,10 @@ async def lifespan(app: FastAPI):
     yield
 
 
-# Initialize FastAPI app
 app = FastAPI(lifespan=lifespan)
 
-
-# Configure Logfire for Observability. The SDK looks for LOGFIRE_TOKEN; this
-# project historically stores it as LOGFIRE_API_KEY, so settings accepts either.
-logfire.configure(
-    send_to_logfire='if-token-present',
-    token=settings.logfire_write_token,
-)
-logfire.instrument_fastapi(app)
-logfire.instrument_pydantic()
-logfire.instrument_pydantic_ai()  # agent run traces + online-evaluation events
-
 # The monolith serves every endpoint — both halves of each route module.
-ROUTE_MODULES = (products, products_bulk, orders, cart, chatbot, auth, google_auth, profile)
+ROUTE_MODULES = (products, products_bulk, orders, cart, auth, google_auth, profile)
 for module in ROUTE_MODULES:
     app.include_router(module.read_router)
     app.include_router(module.write_router)

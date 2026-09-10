@@ -1,8 +1,7 @@
 # 4 · Backend
 
 The backend is a **FastAPI** (Python) application. Its job is to receive HTTP
-requests from the frontend, do the work (talk to MongoDB, call the AI), and
-return JSON.
+requests from the frontend, do the work (talk to MongoDB), and return JSON.
 
 ## Package layout
 
@@ -17,7 +16,6 @@ backend/
     products_bulk.py    JSON bulk-add + Excel/zip upload
     orders.py          place order, order history
     cart.py            add / list / clear cart
-    chatbot.py         POST /chat  (thin HTTP layer — calls chatbot/pipeline.py; see doc 6)
     auth.py            is-admin, register, login
     google_auth.py     Google Sign-In
     profile.py         view/edit profile, avatar, delete account
@@ -26,11 +24,6 @@ backend/
     mongo.py        small reusable query fragments (case-insensitive match)
     passwords.py    bcrypt hash / verify
     users.py        turn a user document into a safe public object (never leak the hash)
-  chatbot/          the portable assistant package (kept in sync with the POC branch)
-    agent.py        the Pydantic AI agent + its search_products tool
-    guardrails.py   the two safety-model checks
-    pipeline.py     run_chat(): guards -> agent -> guard -> response dict
-    online_evals.py background quality scoring on live chats (toggled by a setting)
 main.py            the monolith entry point
 services/
   ingestion/main.py   write-only entry point
@@ -102,18 +95,17 @@ and "the monolith" in another with zero code duplication.
 | `POST` | `/auth/avatar` | Upload a profile picture (stored as base64). |
 | `DELETE` | `/auth/account` | Permanently delete the account and its cart. Requires the password. |
 
-### Assistant & housekeeping
+### Housekeeping
 
 | Method | Path | What it does |
 |--------|------|--------------|
-| `POST` | `/chat` | Send a message, get back `{type: "text" \| "products", message, data}`. See [doc 6](06-ai-assistant.md). |
 | `GET` | `/config` | Tells the frontend where to send write requests. |
 | `GET` | `/health` | Simple "I'm alive" check (split services only). |
 
 ## Configuration — one object
 
 `backend/config.py` builds a single `settings` object with
-[pydantic‑settings](08-glossary.md). Every environment variable the app reads is
+[pydantic‑settings](07-glossary.md). Every environment variable the app reads is
 declared there once, with a type and a default:
 
 ```python
@@ -127,13 +119,8 @@ the important ones:
 | Variable | Needed for |
 |----------|-----------|
 | `MONGO_URI` | the database connection |
-| `GROQ_API_KEY` | every language‑model call |
-| `GOOGLE_CLIENT_ID` | "Sign in with Google" |
-| `LOGFIRE_API_KEY` | tracing (optional) |
-| `PORTKEY_API_KEY`, `PORTKEY_GROQ_PROVIDER` | routing model calls through Portkey (optional) |
+| `GOOGLE_CLIENT_ID` | "Sign in with Google" (optional) |
 | `ALLOWED_ORIGINS`, `INGESTION_SERVICE_URL` | only used in the split‑services deployment |
-
-Anything left as a `REPLACE_WITH_…` placeholder is treated as "not set."
 
 ## Database module
 
@@ -150,11 +137,3 @@ Request bodies are Pydantic models (`backend/models.py`). FastAPI validates the
 incoming JSON against them automatically and returns a `422` with a clear
 message if it doesn't fit — so route functions can assume their input is the
 right shape. Quantities must be ≥ 1, prices ≥ 0.
-
-## Observability
-
-`main.py` (and each service) calls `logfire.configure(...)` and then
-`logfire.instrument_fastapi(app)`. From then on every request is a span in
-[Pydantic Logfire](08-glossary.md), and the AI agent's runs are nested spans
-inside the `/chat` request that triggered them. Errors in the chatbot are
-recorded with `logfire.exception(...)`.

@@ -1,6 +1,6 @@
 # Deploying LUXE to Google Cloud Run
 
-This is the hands‑on companion to [`docs/07-deployment.md`](docs/07-deployment.md).
+This is the hands‑on companion to [`docs/06-deployment.md`](docs/06-deployment.md).
 It walks through setting up the Google Cloud project so that the GitHub Actions
 pipeline (`.github/workflows/cicd.yaml`) can build and deploy the two container
 services on every push to `main`.
@@ -118,11 +118,7 @@ gcloud iam workload-identity-pools providers describe github-provider \
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | the provider resource name from step 4 |
 | `GCP_SERVICE_ACCOUNT_EMAIL` | `luxe-deployer@YOUR_PROJECT_ID.iam.gserviceaccount.com` |
 | `MONGO_URI` | your MongoDB Atlas connection string |
-| `GROQ_API_KEY` | from console.groq.com |
 | `GOOGLE_CLIENT_ID` | OAuth client id (only if you want Google Sign‑In) |
-| `LOGFIRE_API_KEY` | Logfire write token (optional) |
-| `PORTKEY_API_KEY` | Portkey key (optional) |
-| `PORTKEY_GROQ_PROVIDER` | Portkey provider slug, default `groq` (optional) |
 
 ---
 
@@ -144,7 +140,7 @@ URL, deploys **retrieval** with `INGESTION_SERVICE_URL` set to it, then goes
 back and tightens ingestion's `ALLOWED_ORIGINS` to retrieval's real URL. This is
 because Cloud Run only assigns a service its URL after the first deploy, and
 each service needs to know the other's address. See
-[`docs/07-deployment.md`](docs/07-deployment.md) for the reasoning.
+[`docs/06-deployment.md`](docs/06-deployment.md) for the reasoning.
 
 ---
 
@@ -163,5 +159,5 @@ gcloud run services update-traffic luxe-retrieval \
 ```bash
 gcloud run services update luxe-retrieval \
   --region=us-central1 \
-  --update-env-vars "AGENT_MODEL_NAME=openai/gpt-oss-120b"
+  --update-env-vars "ALLOWED_ORIGINS=https://example.com"
 ```
