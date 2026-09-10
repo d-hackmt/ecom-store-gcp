@@ -18,6 +18,7 @@ pymongo[srv]
 # --- Authentication ---
 bcrypt                           # password hashing
 google-auth                      # Google Sign-In: verifies the ID-token signature
+requests                         # HTTP transport used by google-auth
 
 # --- Spreadsheet ingestion ---
 openpyxl                         # bulk product upload (.xlsx workbook)
