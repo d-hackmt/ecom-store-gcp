@@ -14,6 +14,8 @@ import { API_BASE, INGESTION_API_BASE, adminHeaders } from './common.js';
  * throws Error(<backend detail>) on any non-2xx response or network failure —
  * so every caller can rely on "it returned" meaning "it worked".
  */
+const REQUEST_TIMEOUT_MS = 20000;
+
 export async function request(path, { method = 'GET', body, headers = {}, write = false, admin = false } = {}) {
   const base = write ? INGESTION_API_BASE : API_BASE;
 
@@ -28,11 +30,20 @@ export async function request(path, { method = 'GET', body, headers = {}, write 
     opts.headers['Content-Type'] = 'application/json';
   }
 
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
+  opts.signal = timeoutController.signal;
+
   let res;
   try {
     res = await fetch(`${base}${path}`, opts);
-  } catch {
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new Error('The server is taking too long to respond. Please try again in a moment.');
+    }
     throw new Error('Could not reach the server. Check your connection and try again.');
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   const payload = await res.json().catch(() => null);

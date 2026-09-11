@@ -70,11 +70,11 @@ class FakeCollection:
                 result.pop(field, None)
         return result
 
-    def find_one(self, query=None):
+    def find_one(self, query=None, projection=None):
         query = query or {}
         for doc in self.docs:
             if self._matches(doc, query):
-                return doc
+                return self._project(doc, projection) if projection else doc
         return None
 
     def find(self, query=None, projection=None):

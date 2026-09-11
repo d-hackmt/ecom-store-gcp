@@ -2,7 +2,9 @@
 Single-product routes: add, list, get one, update, delete. Bulk ingestion
 (JSON bulk-add and the Excel + images-zip upload) lives in products_bulk.py.
 """
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
+import base64
+
+from fastapi import APIRouter, Response, UploadFile, File, Form, HTTPException, Depends
 from bson import ObjectId
 from bson.errors import InvalidId
 
@@ -93,6 +95,25 @@ def get_product(id: str):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return _public_product(product)
+
+
+@read_router.get("/{id}/image")
+def get_product_image(id: str):
+    """
+    Stream a product's stored image directly, so product list/detail
+    responses can link to this instead of embedding the base64 bytes inline.
+    """
+    product = products_collection.find_one(
+        {"_id": _object_id(id)}, {"image_data": 1, "image_content_type": 1}
+    )
+    if not product or not product.get("image_data"):
+        raise HTTPException(status_code=404, detail="Image not found")
+    image_bytes = base64.b64decode(product["image_data"])
+    return Response(
+        content=image_bytes,
+        media_type=product.get("image_content_type") or "image/jpeg",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
 
 
 @write_router.delete("")

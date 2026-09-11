@@ -74,6 +74,8 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
+            --min-instances=1 \
+            --cpu-boost \
             --set-env-vars "MONGO_URI=${{ secrets.MONGO_URI }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},ALLOWED_ORIGINS=*"
 
       - name: Get ingestion URL
@@ -87,6 +89,8 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
+            --min-instances=1 \
+            --cpu-boost \
             --set-env-vars "MONGO_URI=${{ secrets.MONGO_URI }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},INGESTION_SERVICE_URL=${{ steps.ingestion_url.outputs.url }},ALLOWED_ORIGINS=*"
 
       - name: Get retrieval URL

@@ -46,7 +46,7 @@ def test_add_and_list_product_as_admin(client, admin_headers):
     assert product["name"] == "Classic Shirt"
     assert product["price"] == 499
     assert product["size"] == ["M", "L"]
-    assert product["image"].startswith("data:image/jpeg;base64,")
+    assert product["image"] == f"/products/{product['id']}/image"
     assert "image_data" not in product
     assert "image_content_type" not in product
 
@@ -168,8 +168,28 @@ def test_get_single_product(client, admin_headers):
     body = res.json()
     assert body["id"] == product_id
     assert body["name"] == "Solo"
-    assert body["image"].startswith("data:image/jpeg;base64,")
+    assert body["image"] == f"/products/{product_id}/image"
     assert "image_data" not in body
+
+
+def test_get_product_image(client, admin_headers):
+    client.post(
+        "/products",
+        data={"name": "Imaged", "description": "d", "price": "500", "category": "men"},
+        files={"image": ("a.jpg", b"fakejpegbytes", "image/jpeg")},
+        headers=admin_headers,
+    )
+    product_id = client.get("/products").json()[0]["id"]
+
+    res = client.get(f"/products/{product_id}/image")
+    assert res.status_code == 200
+    assert res.content == b"fakejpegbytes"
+    assert res.headers["content-type"] == "image/jpeg"
+
+
+def test_get_product_image_not_found(client):
+    res = client.get("/products/000000000000000000000000/image")
+    assert res.status_code == 404
 
 
 def test_get_single_product_not_found(client):
