@@ -21,7 +21,10 @@ function renderChatbot() {
       <button id="chatToggle" class="chatbot-toggle">💬 Chat</button>
       ${chatOpen ? `
         <div class="chatbot-window">
-          <div class="chatbot-header">AI Assistant</div>
+          <div class="chatbot-header">
+            <span>AI Assistant</span>
+            <button id="chatClear" class="chatbot-clear" title="Clear chat">Clear</button>
+          </div>
           <div class="chatbot-messages" id="chatMessages">
             ${chatMessages.map(renderMessage).join('')}
             ${chatLoading ? '<p class="chatbot-typing">🤖 Typing...</p>' : ''}
@@ -67,6 +70,11 @@ function wireChatbotEvents() {
   });
 
   document.getElementById('chatSend')?.addEventListener('click', sendCurrentMessage);
+
+  document.getElementById('chatClear')?.addEventListener('click', () => {
+    state.chatMessages = [];
+    mountChatbot();
+  });
 
   const input = document.getElementById('chatInput');
   input?.addEventListener('input', (e) => { state.chatInput = e.target.value; });

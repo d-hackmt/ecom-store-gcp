@@ -961,6 +961,24 @@ body {
   background-color: var(--ink);
   color: white;
   border-radius: 1rem 1rem 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chatbot-clear {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: white;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 9999px;
+  padding: 0.2rem 0.7rem;
+  cursor: pointer;
+}
+
+.chatbot-clear:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .chatbot-messages {
