@@ -1,11 +1,11 @@
 steps:
   # 1. Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA', '.']
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA', '.']
     
   # 2. Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA']
+    args: ['push', 'asia-south1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA']
 
   # 3. Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -15,9 +15,9 @@ steps:
       - 'deploy'
       - 'store'
       - '--image'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA'
+      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA'
       - '--region'
-      - 'us-central1'
+      - 'asia-south1'
       - '--allow-unauthenticated'
       - '--port'
       - '8000'
@@ -25,7 +25,7 @@ steps:
       - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest'
 
 images:
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA'
+  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/store-repo/main-app:$COMMIT_SHA'
 
 options:
   logging: CLOUD_LOGGING_ONLY
