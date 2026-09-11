@@ -1,5 +1,15 @@
 import { request } from './http.js';
 
+// Caches in-flight/resolved product list fetches by query string, so pages
+// that fetch the same catalog view (e.g. Home and Cart both fetching the
+// unfiltered list) share one network request instead of each firing their own.
+const productsCache = new Map();
+
+/** Clears the product list cache; call after any write so stale data isn't served. */
+export function invalidateProductsCache() {
+  productsCache.clear();
+}
+
 /**
  * Fetch products, optionally filtering by category and/or price range.
  */
@@ -9,7 +19,14 @@ export async function fetchProducts(category = '', minPrice = null, maxPrice = n
   if (minPrice !== null) params.set('min_price', minPrice);
   if (maxPrice !== null) params.set('max_price', maxPrice);
   const query = params.toString() ? `?${params.toString()}` : '';
-  return request(`/products${query}`);
+
+  if (productsCache.has(query)) return productsCache.get(query);
+  const promise = request(`/products${query}`).catch(err => {
+    productsCache.delete(query);
+    throw err;
+  });
+  productsCache.set(query, promise);
+  return promise;
 }
 
 /**
@@ -23,7 +40,9 @@ export async function fetchProduct(id) {
  * Add a new product. `formData` must be a FormData carrying the fields and the image.
  */
 export async function addProduct(formData) {
-  return request('/products', { method: 'POST', write: true, admin: true, body: formData });
+  const result = await request('/products', { method: 'POST', write: true, admin: true, body: formData });
+  invalidateProductsCache();
+  return result;
 }
 
 /**
@@ -34,7 +53,9 @@ export async function bulkUploadProducts(excelFile, zipFile) {
   const formData = new FormData();
   formData.append('excel_file', excelFile);
   formData.append('images_zip', zipFile);
-  return request('/products/bulk-upload', { method: 'POST', write: true, admin: true, body: formData });
+  const result = await request('/products/bulk-upload', { method: 'POST', write: true, admin: true, body: formData });
+  invalidateProductsCache();
+  return result;
 }
 
 /**
@@ -42,19 +63,25 @@ export async function bulkUploadProducts(excelFile, zipFile) {
  * multipart/form-data only); include only the fields being changed.
  */
 export async function updateProduct(id, formData) {
-  return request(`/products/${id}`, { method: 'PUT', write: true, admin: true, body: formData });
+  const result = await request(`/products/${id}`, { method: 'PUT', write: true, admin: true, body: formData });
+  invalidateProductsCache();
+  return result;
 }
 
 /**
  * Delete a product by its ID.
  */
 export async function deleteProduct(id) {
-  return request(`/products/${id}`, { method: 'DELETE', write: true, admin: true });
+  const result = await request(`/products/${id}`, { method: 'DELETE', write: true, admin: true });
+  invalidateProductsCache();
+  return result;
 }
 
 /**
  * Delete all products from the database.
  */
 export async function deleteAllProducts() {
-  return request('/products', { method: 'DELETE', write: true, admin: true });
+  const result = await request('/products', { method: 'DELETE', write: true, admin: true });
+  invalidateProductsCache();
+  return result;
 }
