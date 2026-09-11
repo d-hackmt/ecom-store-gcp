@@ -36,14 +36,9 @@ htmlcov/
 # Logs
 *.log
 
-# Pydantic Logfire local cache
-.logfire/
-
 # Jupyter
 .ipynb_checkpoints/
 
 # Local scratch notebooks — never committed
 experiments/
-
-.github/
 

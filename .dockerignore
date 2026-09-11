@@ -28,7 +28,6 @@ venv/
 # Caches / logs / scratch
 .pytest_cache/
 .mypy_cache/
-.logfire/
 *.log
 experiments/
 
