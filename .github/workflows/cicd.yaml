@@ -78,6 +78,8 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
+            --min-instances=1 \
+            --cpu-boost \
             --set-env-vars "MONGO_URI=${{ secrets.MONGO_URI }},GROQ_API_KEY=${{ secrets.GROQ_API_KEY }},LOGFIRE_API_KEY=${{ secrets.LOGFIRE_API_KEY }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},PORTKEY_API_KEY=${{ secrets.PORTKEY_API_KEY }},PORTKEY_GROQ_PROVIDER=${{ secrets.PORTKEY_GROQ_PROVIDER }},ALLOWED_ORIGINS=*"
 
       - name: Get ingestion URL
@@ -91,6 +93,8 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
+            --min-instances=1 \
+            --cpu-boost \
             --set-env-vars "MONGO_URI=${{ secrets.MONGO_URI }},GROQ_API_KEY=${{ secrets.GROQ_API_KEY }},LOGFIRE_API_KEY=${{ secrets.LOGFIRE_API_KEY }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},PORTKEY_API_KEY=${{ secrets.PORTKEY_API_KEY }},PORTKEY_GROQ_PROVIDER=${{ secrets.PORTKEY_GROQ_PROVIDER }},INGESTION_SERVICE_URL=${{ steps.ingestion_url.outputs.url }},ALLOWED_ORIGINS=*"
 
       - name: Get retrieval URL

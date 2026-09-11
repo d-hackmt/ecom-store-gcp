@@ -19,12 +19,16 @@ def to_data_url(image_data: str, content_type: str) -> str:
 
 def resolve_image_field(document: dict) -> None:
     """
-    Mutate `document` in place: ensure `image` is a usable URL (either its
-    existing http(s) URL, or a reconstructed data: URL from image_data /
-    image_content_type), then strip the raw base64 fields from the document.
+    Mutate `document` in place: ensure `image` is a usable URL, then strip the
+    raw base64 fields from the document. `document["id"]` must already be set.
+
+    Uses the existing http(s) URL if there is one, otherwise points at this
+    product's dedicated image endpoint rather than embedding the raw base64
+    bytes inline — a product list response would otherwise ship the full
+    image data (inflated ~33% by base64) for every product on every request.
     """
     has_url = bool(document.get("image")) and str(document["image"]).startswith("http")
     if not has_url and document.get("image_data") and document.get("image_content_type"):
-        document["image"] = to_data_url(document["image_data"], document["image_content_type"])
+        document["image"] = f"/products/{document['id']}/image"
     document.pop("image_data", None)
     document.pop("image_content_type", None)

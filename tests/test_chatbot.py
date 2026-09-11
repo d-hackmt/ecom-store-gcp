@@ -26,8 +26,8 @@ def test_chat_route_delegates_to_pipeline(client, monkeypatch):
 def test_search_products_tool_resolves_image_and_strips_raw_fields(fake_db):
     """
     Unit test for the search_products tool itself (not through the agent/LLM):
-    confirms it reconstructs a data: URL from image_data/image_content_type and
-    never leaks the raw base64 fields, matching GET /products behaviour.
+    confirms it points "image" at the product's image endpoint and never
+    leaks the raw base64 fields, matching GET /products behaviour.
     """
     fake_db["products"].insert_one({
         "name": "Test Product",
@@ -42,6 +42,7 @@ def test_search_products_tool_resolves_image_and_strips_raw_fields(fake_db):
     result = search_products(ctx, category="men")
 
     assert "Found 1" in result
-    assert deps.found_products[0]["image"] == "data:image/png;base64,ZmFrZQ=="
+    product_id = deps.found_products[0]["id"]
+    assert deps.found_products[0]["image"] == f"/products/{product_id}/image"
     assert "image_data" not in deps.found_products[0]
     assert "image_content_type" not in deps.found_products[0]
