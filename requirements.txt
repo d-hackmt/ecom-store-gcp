@@ -13,6 +13,7 @@ pydantic
 pydantic-settings                # typed configuration loaded from the environment / .env
 
 # --- Database ---
+pymongo
 pymongo[srv]
 
 # --- Authentication ---
