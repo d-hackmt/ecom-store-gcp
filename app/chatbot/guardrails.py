@@ -15,6 +15,7 @@ calls Groq directly.
 """
 import json
 
+import logfire
 from groq import AsyncGroq
 from openai import AsyncOpenAI
 
@@ -168,7 +169,7 @@ async def violates_content_policy(user_message: str) -> bool:
     """True if gpt-oss-safeguard-20b flags the user's message as unsafe (input guard)."""
     is_unsafe, reason = await _check_safety(user_message, INPUT_POLICY)
     if is_unsafe:
-        print(f"[Guardrail] Input blocked: {reason}")
+        logfire.warn("Guardrail blocked input: {reason}", reason=reason)
     return is_unsafe
 
 
@@ -176,5 +177,5 @@ async def violates_output_policy(agent_reply: str) -> bool:
     """True if gpt-oss-safeguard-20b flags the agent's reply as unsafe (output guard)."""
     is_unsafe, reason = await _check_safety(agent_reply, OUTPUT_POLICY)
     if is_unsafe:
-        print(f"[Guardrail] Output blocked: {reason}")
+        logfire.warn("Guardrail blocked output: {reason}", reason=reason)
     return is_unsafe
