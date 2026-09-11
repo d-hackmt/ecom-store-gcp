@@ -31,6 +31,7 @@ def add_to_cart(item: CartItem):
         cart_collection.insert_one(item.model_dump())
     return {"message": "Item added to cart"}
 
+
 @read_router.get("/{user_email}")
 def get_cart(user_email: str):
     """
@@ -38,6 +39,7 @@ def get_cart(user_email: str):
     """
     items = list(cart_collection.find({"user_email": user_email}, {"_id": 0}))
     return items
+
 
 @write_router.delete("/{user_email}")
 def clear_cart(user_email: str):

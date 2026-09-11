@@ -15,7 +15,7 @@ from pydantic_ai.providers.openai import OpenAIProvider
 from ..config import REFUSAL_MESSAGE, settings
 from ..database import products_collection
 from ..utils.images import resolve_image_field
-from ..utils.mongo import case_insensitive_contains, case_insensitive_exact
+from ..utils.mongo import case_insensitive_contains, case_insensitive_exact, price_range_filter
 from ..utils.llm_gateway import (
     PORTKEY_API_KEY,
     PORTKEY_BASE_URL,
@@ -81,7 +81,7 @@ def search_products(
     Search the LUXE product database.
 
     Args:
-        category: Filter by category — one of 'men', 'women', 'kids', 'accessories'.
+        category: Filter by category — one of 'men', 'women', 'kids'.
         keyword: Search by product name keyword (e.g. 'shirt', 'dress', 'jacket').
         max_price: Maximum price in rupees (e.g. 2000 means under ₹2000).
         min_price: Minimum price in rupees.
@@ -97,11 +97,7 @@ def search_products(
     if keyword:
         query["name"] = case_insensitive_contains(keyword.strip())
 
-    price_filter: Dict[str, int] = {}
-    if max_price is not None:
-        price_filter["$lte"] = max_price
-    if min_price is not None:
-        price_filter["$gte"] = min_price
+    price_filter = price_range_filter(min_price, max_price)
     if price_filter:
         query["price"] = price_filter
 

@@ -15,7 +15,8 @@ from ..database import products_collection
 from ..auth import require_admin
 
 # Split so the read replica / write replica of the deployment can each mount only
-# the half it serves. The monolith (main.py) mounts both.
+# the half it serves. The monolith (main.py) mounts both. Bulk ingestion only
+# ever writes, so it lives on the write side; read_router stays empty.
 read_router = APIRouter(prefix="/products", tags=["Products"])
 write_router = APIRouter(prefix="/products", tags=["Products"])
 

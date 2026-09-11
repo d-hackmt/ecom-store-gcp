@@ -2,6 +2,8 @@
 Single-product routes: add, list, get one, update, delete. Bulk ingestion
 (JSON bulk-add and the Excel + images-zip upload) lives in products_bulk.py.
 """
+from typing import Optional
+
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -9,7 +11,7 @@ from bson.errors import InvalidId
 from ..database import products_collection
 from ..auth import require_admin
 from ..utils.images import encode_upload_to_base64, resolve_image_field
-from ..utils.mongo import case_insensitive_exact
+from ..utils.mongo import case_insensitive_exact, price_range_filter
 
 # Split so the read replica / write replica of the deployment can each mount only
 # the half it serves. The monolith (main.py) mounts both.
@@ -65,20 +67,15 @@ async def add_product(
 
 
 @read_router.get("")
-def get_products(category: str = "", min_price: int = None, max_price: int = None):
+def get_products(category: str = "", min_price: Optional[int] = None, max_price: Optional[int] = None):
     """
     Get products with optional category, min_price, and max_price filters.
     """
     products = []
     query = {"category": case_insensitive_exact(category)} if category else {}
 
-    # Apply price range filter
-    if min_price is not None or max_price is not None:
-        price_query = {}
-        if min_price is not None:
-            price_query["$gte"] = min_price
-        if max_price is not None:
-            price_query["$lte"] = max_price
+    price_query = price_range_filter(min_price, max_price)
+    if price_query:
         query["price"] = price_query
 
     for product in products_collection.find(query):
