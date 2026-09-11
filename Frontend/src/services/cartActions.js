@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { addToCart } from './api/cart.js';
 import { refreshCartCount } from './cartCount.js';
+import { navigate } from './nav.js';
 
 /**
  * Shared "Add to Cart" button behaviour: disables the button, calls the API,
@@ -8,6 +9,11 @@ import { refreshCartCount } from './cartCount.js';
  * handing control back to the caller (each page re-renders differently after).
  */
 export async function handleAddToCartClick(buttonEl, productName, { onSuccess, delay = 1000 } = {}) {
+  if (!state.isLoggedIn) {
+    alert('Please log in to add items to your cart.');
+    navigate('#/profile');
+    return;
+  }
   const originalText = buttonEl.textContent;
   buttonEl.disabled = true;
   buttonEl.textContent = 'Adding...';

@@ -34,7 +34,7 @@ export async function renderProductDetail(id) {
       <button class="back-btn" id="backBtn">← Back to Products</button>
       <div class="product-detail-grid">
         <div class="product-detail-image">
-          <img src="${escapeHtml(product.image || PLACEHOLDER_IMAGE)}" alt="${escapeHtml(product.name)}" />
+          <img src="${escapeHtml(product.image || PLACEHOLDER_IMAGE)}" alt="${escapeHtml(product.name)}" loading="lazy" />
         </div>
         <div class="product-detail-info">
           <span class="product-detail-category">${escapeHtml(product.category)}</span>

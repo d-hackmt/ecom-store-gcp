@@ -74,7 +74,7 @@ export async function renderCart() {
 function renderCartItem(item) {
   return `
     <div class="cart-item">
-      <img class="cart-item-img" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.product_name)}" />
+      <img class="cart-item-img" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.product_name)}" loading="lazy" />
       <div class="cart-item-info">
         <h3 style="font-weight: bold; font-size: 1.1rem; color: #111827;">${escapeHtml(item.product_name)}</h3>
         <p class="muted">Qty: ${escapeHtml(item.quantity)}</p>
