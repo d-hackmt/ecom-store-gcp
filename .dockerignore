@@ -1,15 +1,10 @@
 # Not needed in the image
 .git/
-.github/
 .claude/
 CLAUDE.md
 README.md
 commands.md
 docs/
-tests/
-githooks/
-pytest.ini
-requirements-dev.txt
 
 # Python
 __pycache__/

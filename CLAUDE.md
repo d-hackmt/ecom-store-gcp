@@ -18,12 +18,10 @@ explicitly asked. Never make a change on a demo branch expecting it to flow back
 
 ## Architecture (this branch)
 
-- `backend/` — the FastAPI app. One package, imported by three entrypoints:
-  - `main.py` — the monolith (storefront + every endpoint). This is the default.
-  - `services/retrieval/main.py` — read endpoints + storefront only.
-  - `services/ingestion/main.py` — write endpoints only.
-- `backend/routes/*.py` — each module exposes `read_router` + `write_router`;
-  entrypoints mount the half they serve. A new endpoint is declared once.
+- `backend/` — the FastAPI app. One package, one entrypoint:
+  - `main.py` — the monolith (storefront + every endpoint).
+- `backend/routes/*.py` — each module exposes `read_router` + `write_router`,
+  both mounted by `main.py`. A new endpoint is declared once.
 - `backend/chatbot/` — the portable assistant package (kept in sync with
   `02-chatbot-poc`):
   - `agent.py` — the Pydantic AI agent + its `search_products` tool.
@@ -44,15 +42,12 @@ explicitly asked. Never make a change on a demo branch expecting it to flow back
 - **Imports:** relative within `backend/` (`from ..config import settings`).
 - **AI libraries:** verify class/kwarg names against the installed version before
   using them — `pydantic-ai` / `pydantic-evals` move fast.
-- **Tests:** every bug fix gets a test. The suite is fully offline — DB is an
-  in-memory fake (`tests/conftest.py`), the LLM boundary is mocked. No network.
 - **No dead code, no redundancy.** Removed code goes away, not commented out.
 
 ## Commands
 
 ```bash
 python main.py                       # run the monolith on :8000
-pytest                               # full offline suite
 python -m backend.evals.chatbot_evals   # offline eval suite (needs real GROQ_API_KEY + MONGO_URI)
 ```
 

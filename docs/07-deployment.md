@@ -1,7 +1,8 @@
 # 7 · Deployment
 
-In production, LUXE runs on **Google Cloud** as **two containers on Cloud
-Run**, deployed automatically by **GitHub Actions** on every push to `main`.
+In production, LUXE runs on **Google Cloud** as a single container on Cloud
+Run, built and deployed automatically by **Google Cloud Build** on every push
+to this branch.
 
 For the step‑by‑step "set up the Google Cloud project" commands, see
 [`commands.md`](../commands.md) in the repo root. This page explains *what* is
@@ -11,113 +12,72 @@ used and *why*.
 
 | Service | What it does here |
 |---------|-------------------|
-| **Cloud Run** | Runs the two container images. Fully managed: no VMs to patch, scales up under load, scales to **zero** when idle (you pay per request). Each service gets a public HTTPS URL. |
-| **Artifact Registry** | A private Docker image store. The pipeline pushes `ingestion` and `retrieval` images here, tagged with the Git commit hash, in a repository called `luxe` in region `us-central1`. |
-| **IAM – Workload Identity Federation** | Lets GitHub Actions prove its identity to Google Cloud **without a stored key**. GitHub's short‑lived OIDC token is exchanged for a short‑lived Google access token at deploy time. Nothing secret is kept in the repo. |
-| **IAM – Service Account** | The identity the deploy *acts as*. It needs three roles: **Cloud Run Admin** (deploy services), **Artifact Registry Writer** (push images), **Service Account User** (let Cloud Run run as itself). |
+| **Cloud Build** | Builds the Docker image and runs the deploy step, defined in [`cloudbuild.yaml`](../cloudbuild.yaml) at the repo root. A Cloud Build trigger connected to this repo runs it automatically on every push. |
+| **Cloud Run** | Runs the container as a single service (`main-app`). Fully managed: no VMs to patch, scales up under load, scales to **zero** when idle (you pay per request). Gets a public HTTPS URL. |
+| **Artifact Registry** | A private Docker image store — the pipeline pushes the built image here, tagged with the Git commit hash, in a repository called `main-repo`. |
+| **Secret Manager** | Holds `MONGO_URI`, `GOOGLE_CLIENT_ID`, and `GROQ_API_KEY`. `cloudbuild.yaml`'s `--set-secrets` maps them into the container as environment variables — nothing sensitive sits in a committed file. |
 
-**APIs to enable** on the project: `run.googleapis.com` (Cloud Run),
-`artifactregistry.googleapis.com` (Artifact Registry), `iamcredentials.googleapis.com`
-and `sts.googleapis.com` (for the token exchange).
-
-> **Not used:** Cloud Build — images are built on the GitHub Actions runner with
-> plain `docker build`, not in Google Cloud. No Cloud Storage, Cloud SQL, or VMs.
+**Region:** `asia-south1` (Mumbai) — matches MongoDB Atlas's own region, so the
+app and the database aren't paying a cross-continent round trip on every query.
 
 **MongoDB Atlas is not a Google Cloud service.** It is a managed database from
-MongoDB Inc. (it *can* run on Google's infrastructure, but you manage it through
-the MongoDB dashboard). The app reaches it over the internet using `MONGO_URI`.
+MongoDB Inc. The app reaches it over the internet using `MONGO_URI`.
 
-## The two container images
+**Logfire and Portkey are optional and not currently wired into the deploy.**
+`cloudbuild.yaml` only sets `MONGO_URI`, `GOOGLE_CLIENT_ID`, and `GROQ_API_KEY`
+as secrets — there's no `LOGFIRE_TOKEN`/`LOGFIRE_API_KEY` or `PORTKEY_API_KEY`
+secret wired up yet. The app runs fine without them (both are no-ops when
+unconfigured — see `backend/config.py` and `backend/utils/llm_gateway.py`);
+add the corresponding secrets and `--set-secrets` entries if you want tracing
+or the Portkey gateway live in production.
 
-Both are built from the repo root, both start from `python:3.11-slim`, both
-install `requirements.txt`.
+## The container image
 
-```mermaid
-flowchart LR
-    subgraph ing["ingestion image"]
-        i1["COPY backend/"]
-        i2["COPY services/ingestion/"]
-        i3["uvicorn services.ingestion.main:app<br/>port 8001"]
-    end
-    subgraph ret["retrieval image"]
-        r1["COPY backend/"]
-        r2["COPY services/retrieval/"]
-        r3["COPY Frontend/"]
-        r4["uvicorn services.retrieval.main:app<br/>port 8000"]
-    end
-```
-
-The `retrieval` image also bundles `Frontend/` because that service serves the
-storefront. The `ingestion` image doesn't need it.
+One image, built from the repo-root `Dockerfile`, running the **monolith**
+(`main.py` — the storefront, every API endpoint, and the AI chat pipeline, all
+in one process, port 8000). This branch ships that single entry point only.
 
 ## The pipeline
 
-`.github/workflows/cicd.yaml`, triggered by a push to `main`:
+`cloudbuild.yaml`, triggered by a push:
 
 ```mermaid
 sequenceDiagram
     participant Dev as Developer
-    participant GH as GitHub Actions
+    participant CB as Cloud Build
     participant AR as Artifact Registry
     participant CR as Cloud Run
 
-    Dev->>GH: git push origin main
-
-    rect rgb(235,248,255)
-    Note over GH: job 1 — test
-    GH->>GH: pip install -r requirements-dev.txt
-    GH->>GH: pytest -q     (all DB/LLM calls are mocked)
-    end
-
-    rect rgb(255,243,224)
-    Note over GH: job 2 — deploy (only if tests pass)
-    GH->>GH: authenticate to Google Cloud (Workload Identity Federation)
-    GH->>AR: build + push ingestion:(sha) and retrieval:(sha)
-    GH->>CR: deploy luxe-ingestion  (CORS = * for now)
-    CR-->>GH: ingestion URL
-    GH->>CR: deploy luxe-retrieval  (INGESTION_SERVICE_URL = ingestion URL)
-    CR-->>GH: retrieval URL
-    GH->>CR: update ingestion  (CORS = retrieval URL)
-    end
+    Dev->>CB: git push
+    CB->>CB: docker build .
+    CB->>AR: push image (tagged :COMMIT_SHA)
+    CB->>CR: gcloud run deploy main-app (--set-secrets MONGO_URI, GOOGLE_CLIENT_ID, GROQ_API_KEY)
+    CR-->>CB: service URL
 ```
 
-### Why deploy in that order
+Cloud Run flags used: `--memory 1Gi --cpu 1 --cpu-boost --timeout 300` — sized
+for the LLM calls the chat pipeline makes, which run longer than a typical
+CRUD request.
 
-The storefront is served by **retrieval**, so when the browser sends a write
-request to **ingestion**, that request comes *from retrieval's domain*.
-Ingestion's CORS settings must allow that domain. But:
+## Secrets the pipeline needs
 
-- retrieval needs ingestion's URL first (it hands it to the frontend via
-  `GET /config`), and
-- Cloud Run only assigns a service its URL *after* the first deploy.
-
-So the pipeline: deploy ingestion with a permissive `ALLOWED_ORIGINS=*` →
-deploy retrieval (now it knows ingestion's URL) → go back and tighten
-ingestion's `ALLOWED_ORIGINS` to retrieval's real URL.
-
-## Secrets the pipeline needs (GitHub → repo → Settings → Secrets)
+Stored in **Secret Manager**, not the repo — `cloudbuild.yaml` reads them at
+deploy time via `--set-secrets`:
 
 | Secret | Purpose |
 |--------|---------|
-| `GCP_PROJECT_ID` | which Google Cloud project to deploy into |
-| `GCP_WORKLOAD_IDENTITY_PROVIDER` | the Workload Identity provider resource name |
-| `GCP_SERVICE_ACCOUNT_EMAIL` | the deploy service account |
-| `MONGO_URI` | database connection (passed to both services + the test job) |
-| `GROQ_API_KEY` | language‑model calls |
+| `MONGO_URI` | database connection |
 | `GOOGLE_CLIENT_ID` | Google Sign‑In |
-| `LOGFIRE_API_KEY` | tracing (optional) |
-| `PORTKEY_API_KEY`, `PORTKEY_GROQ_PROVIDER` | route model calls through Portkey (optional) |
+| `GROQ_API_KEY` | the shopping agent's and guardrails' language-model calls |
+
+To rotate a value (e.g. after changing the DB password): open the secret in
+Secret Manager, add a new version, then re-run the Cloud Build trigger so the
+next deploy picks up `:latest`.
 
 ## Running it yourself without Google Cloud
 
-You don't need any of the above to run LUXE. Two options:
-
 ```bash
-# Monolith — one process, everything on port 8000
-python main.py
-
-# Split services — mirrors production, retrieval:8000 + ingestion:8001
-docker-compose up
+python main.py   # one process, everything on port 8000
 ```
 
-Both read configuration from a `.env` file (copy `.env.example`).
+Reads configuration from a `.env` file (copy `.env.example`).

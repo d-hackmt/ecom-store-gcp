@@ -31,10 +31,7 @@ backend/
     guardrails.py   the two safety-model checks
     pipeline.py     run_chat(): guards -> agent -> guard -> response dict
     online_evals.py background quality scoring on live chats (toggled by a setting)
-main.py            the monolith entry point
-services/
-  ingestion/main.py   write-only entry point
-  retrieval/main.py   read-only entry point + serves the frontend
+main.py            the monolith entry point — mounts every route module
 ```
 
 ## Route modules — reads and writes side by side
@@ -52,16 +49,8 @@ def get_products(...): ...
 async def add_product(...): ...
 ```
 
-The three entry points then mount the halves they need:
-
-| Entry point | Mounts | Also serves |
-|-------------|--------|-------------|
-| `main.py` (monolith) | every `read_router` **and** `write_router` | the frontend, `GET /config` |
-| `services/retrieval/main.py` | every `read_router` | the frontend, `GET /config`, `GET /health` |
-| `services/ingestion/main.py` | every `write_router` | `GET /health` |
-
-This is why the same route function can be "the read service" in one deployment
-and "the monolith" in another with zero code duplication.
+`main.py` (the monolith, and only entry point on this branch) mounts every
+`read_router` **and** `write_router`, plus serves the frontend and `GET /config`.
 
 ## Every endpoint
 
@@ -108,7 +97,6 @@ and "the monolith" in another with zero code duplication.
 |--------|------|--------------|
 | `POST` | `/chat` | Send a message, get back `{type: "text" \| "products", message, data}`. See [doc 6](06-ai-assistant.md). |
 | `GET` | `/config` | Tells the frontend where to send write requests. |
-| `GET` | `/health` | Simple "I'm alive" check (split services only). |
 
 ## Configuration — one object
 
@@ -131,7 +119,6 @@ the important ones:
 | `GOOGLE_CLIENT_ID` | "Sign in with Google" |
 | `LOGFIRE_API_KEY` | tracing (optional) |
 | `PORTKEY_API_KEY`, `PORTKEY_GROQ_PROVIDER` | routing model calls through Portkey (optional) |
-| `ALLOWED_ORIGINS`, `INGESTION_SERVICE_URL` | only used in the split‑services deployment |
 
 Anything left as a `REPLACE_WITH_…` placeholder is treated as "not set."
 

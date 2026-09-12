@@ -75,9 +75,8 @@ graph TD
 | **Spreadsheet import** | openpyxl | Reads the `.xlsx` file in the admin bulk‑upload. |
 | **Observability** | Pydantic Logfire | Collects a trace of every request and every AI step. |
 | **Containers** | Docker | Packages the app so it runs the same everywhere. |
-| **Hosting** | Google Cloud Run | Runs the containers; see [Deployment](07-deployment.md). |
-| **CI/CD** | GitHub Actions | On every push to `main`: run the tests, then build and deploy. |
-| **Tests** | pytest | ~70 tests that run fully offline (all database and AI calls are faked). |
+| **Hosting** | Google Cloud Run | Runs the container; see [Deployment](07-deployment.md). |
+| **CI/CD** | Google Cloud Build | On every push: build the Docker image and deploy to Cloud Run. |
 
 ## What each external service is responsible for
 

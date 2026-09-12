@@ -36,7 +36,7 @@ The full narrative is in [`docs/STORY.md`](docs/STORY.md).
 | **AI assistant** | Pydantic AI agent on Groq models, with input/output safety guardrails |
 | **Evals** | Pydantic Evals — live evaluators on every real chat, plus an offline suite |
 | **Observability** | Pydantic Logfire |
-| **Hosting** | Google Cloud Run (monolith by default; an optional 2-service split is included) |
+| **Hosting** | Google Cloud Run (single container), deployed by Google Cloud Build |
 
 ## Features
 
@@ -67,29 +67,6 @@ python main.py
 
 Open <http://localhost:8000>. The interactive API reference is at
 <http://localhost:8000/docs>.
-
-### Run it the way production does (two services)
-
-```bash
-docker compose up
-# storefront + reads  → http://localhost:8000
-# writes              → http://localhost:8001
-```
-
-## Tests
-
-```bash
-uv pip install -r requirements-dev.txt   # adds pytest
-pytest
-```
-
-The suite runs **fully offline** — every database and language-model call is
-faked, so it is fast, free, and never touches Atlas or Groq. A pre-push git hook
-runs it automatically; activate it once after cloning:
-
-```bash
-git config core.hooksPath githooks
-```
 
 ## Documentation
 

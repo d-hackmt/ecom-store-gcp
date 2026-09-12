@@ -1,22 +1,13 @@
 import { state } from '../state.js';
 
-// Reads (this file is served by the retrieval service) use relative paths.
+// This branch only ships the monolith — reads and writes are the same origin.
 export const API_BASE = "";
-
-// Writes go to the separate ingestion service. On Cloud Run (or any deploy
-// where the two services get unrelated hostnames, not same-host-different-port)
-// there is no way to guess this — it's resolved at startup via initIngestionApiBase(),
-// which asks the retrieval service's own /config endpoint (it's told the
-// ingestion service's real URL via the INGESTION_SERVICE_URL env var at deploy
-// time). This local-dev heuristic is just the fallback until that resolves.
-export let INGESTION_API_BASE = window.location.port === '8000'
-  ? `${window.location.protocol}//${window.location.hostname}:8001`
-  : '';
+export let INGESTION_API_BASE = '';
 
 /**
- * Call once at app startup (before any write call can happen) to resolve the
- * real ingestion service URL for the current deployment. Safe to call even
- * when /config doesn't exist or returns nothing — keeps the local-dev guess.
+ * Call once at app startup. Reads /config in case a future deploy mode ever
+ * points writes elsewhere; a no-op today since the monolith always returns
+ * the same origin.
  */
 export async function initIngestionApiBase() {
   try {
@@ -27,7 +18,7 @@ export async function initIngestionApiBase() {
       INGESTION_API_BASE = data.ingestion_base_url;
     }
   } catch (err) {
-    // Keep the local-dev fallback already assigned above.
+    // Keep the same-origin default already assigned above.
   }
 }
 

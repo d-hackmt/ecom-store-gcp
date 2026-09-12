@@ -13,9 +13,9 @@ are new:
 |---|------|----------------|
 | — | [Story](STORY.md) | How this repo's three branches tell a Forward-Deployed-AI-Engineer story |
 | 1 | [Overview](01-overview.md) | What the project is, the full technology stack, and why each piece is there |
-| 2 | [Architecture](02-architecture.md) | How all the parts fit together, the two ways to run it, and what happens on a request |
+| 2 | [Architecture](02-architecture.md) | How all the parts fit together, and what happens on a request |
 | 3 | [Frontend](03-frontend.md) | The storefront the shopper sees — how the pages, routing and state work |
-| 4 | [Backend](04-backend.md) | The API — every endpoint, and how it splits into a "reads" service and a "writes" service |
+| 4 | [Backend](04-backend.md) | The API — every endpoint, organized into read and write route modules |
 | 5 | [Database](05-database.md) | MongoDB's job, the four collections, and what a document in each looks like |
 | 6 | [AI Assistant](06-ai-assistant.md) | The shopping chatbot: how it turns a sentence into a database query, and the safety guardrails around it |
 | 7 | [Deployment](07-deployment.md) | Google Cloud: every GCP service used, the container images, and the automated deploy pipeline |
@@ -30,5 +30,5 @@ the assistant, the backend hands the message to a **Pydantic AI** agent running
 on **Groq**'s language models; the agent calls one tool, `search_products`,
 which runs a MongoDB query and returns matches. Two lightweight **guardrail**
 models check the message on the way in and the reply on the way out. Everything
-is traced with **Pydantic Logfire**. In production the app runs as two
-containers on **Google Cloud Run**.
+is traced with **Pydantic Logfire**. In production the app runs as a single
+container on **Google Cloud Run**.
