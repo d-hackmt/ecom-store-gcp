@@ -1,7 +1,6 @@
 # Not needed in the image
 .git/
 .claude/
-CLAUDE.md
 README.md
 commands.md
 docs/
