@@ -1,6 +1,0 @@
-# Development & test dependencies. Installs the runtime set too.
-#   uv pip install -r requirements-dev.txt
-
--r requirements.txt
-
-pytest
