@@ -2,6 +2,8 @@
 Order management routes for placing new orders and viewing order history.
 """
 from datetime import datetime, timezone
+
+import logfire
 from fastapi import APIRouter
 from ..models import Order
 from ..database import orders_collection
@@ -19,6 +21,13 @@ def place_order(order: Order):
     order_data = order.model_dump()
     order_data["created_at"] = datetime.now(timezone.utc).isoformat()
     orders_collection.insert_one(order_data)
+    logfire.info(
+        "Order placed: {quantity}x {product} @ {price} by {user}",
+        quantity=order.quantity,
+        product=order.product_name,
+        price=order.price,
+        user=order.user_email,
+    )
     return {"message": "Order placed successfully"}
 
 

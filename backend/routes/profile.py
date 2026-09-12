@@ -2,6 +2,7 @@
 Account management endpoints: view/edit profile, avatar upload, account deletion.
 Registration/login live in auth.py.
 """
+import logfire
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 
 from ..database import users_collection, cart_collection
@@ -110,4 +111,5 @@ def delete_account(payload: AccountDelete):
 
     users_collection.delete_one({"_id": user["_id"]})
     cart_collection.delete_many({"user_email": email})
+    logfire.info("Account deleted: {email}", email=email)
     return {"message": "Account deleted successfully"}

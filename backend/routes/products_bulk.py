@@ -7,6 +7,7 @@ import io
 import mimetypes
 import zipfile
 
+import logfire
 import openpyxl
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 
@@ -134,6 +135,12 @@ async def bulk_upload_products(
 
     if products_to_insert:
         products_collection.insert_many(products_to_insert)
+
+    logfire.info(
+        "Bulk product upload completed: {inserted} inserted, {failed} failed",
+        inserted=len(products_to_insert),
+        failed=len(errors),
+    )
 
     return {
         "message": f"{len(products_to_insert)} product(s) added successfully.",

@@ -73,6 +73,11 @@ Manager, not in any file. `cloudbuild.yaml` reads them at deploy time.
 7. Click **+ CREATE SECRET** again. **Name:** `GROQ_API_KEY`,
    **Secret value:** your Groq API key (powers the shopping assistant and its
    guardrails). Click **Create Secret**.
+8. Click **+ CREATE SECRET** again. **Name:** `LOGFIRE_TOKEN`,
+   **Secret value:** a write token from your Logfire project (**logfire.pydantic.dev**
+   → your project → Settings → Write tokens → Create write token). Without
+   this, the app runs fine but sends no traces and no eval scores anywhere —
+   see [AI Assistant](docs/06-ai-assistant.md). Click **Create Secret**.
 
 *To change a value later (e.g. after rotating the DB password): open the secret,
 click **+ NEW VERSION**, paste the new value, click **Add New Version**. The
@@ -121,7 +126,7 @@ steps:
       - '--timeout'
       - '300'
       - '--set-secrets'
-      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GROQ_API_KEY=GROQ_API_KEY:latest'
+      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GROQ_API_KEY=GROQ_API_KEY:latest,LOGFIRE_TOKEN=LOGFIRE_TOKEN:latest'
 
 images:
   - 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$COMMIT_SHA'
@@ -132,7 +137,7 @@ options:
 
 The `--set-secrets` line maps the Secret Manager secrets you created in Phase 2
 into the container as environment variables (`MONGO_URI`, `GOOGLE_CLIENT_ID`,
-`GROQ_API_KEY`). `--memory`/`--cpu`/`--cpu-boost`/`--timeout` are sized for the
+`GROQ_API_KEY`, `LOGFIRE_TOKEN`). `--memory`/`--cpu`/`--cpu-boost`/`--timeout` are sized for the
 LLM calls the chat pipeline makes, which run longer than a typical CRUD
 request. Only edit this file if you deliberately want to change the region,
 service name, or repo name — and if you do, make sure your Artifact Registry
@@ -166,7 +171,7 @@ This is the most common place where beginners get stuck. Cloud Build acts like a
 7. Click **+ ADD ANOTHER ROLE** again.
 8. Search for and select **Logs Writer**.
 9. Click **+ ADD ANOTHER ROLE** again.
-10. Search for and select **Secret Manager Secret Accessor** (lets the deployed service read `MONGO_URI`, `GOOGLE_CLIENT_ID`, and `GROQ_API_KEY`).
+10. Search for and select **Secret Manager Secret Accessor** (lets the deployed service read `MONGO_URI`, `GOOGLE_CLIENT_ID`, `GROQ_API_KEY`, and `LOGFIRE_TOKEN`).
 11. Click **Save**.
 
 ---
@@ -215,9 +220,9 @@ If your build succeeds but your website shows a "Service Unavailable" or crashes
 
 ### 1. Config comes from Secret Manager
 
-`cloudbuild.yaml` already injects `MONGO_URI`, `GOOGLE_CLIENT_ID`, and
-`GROQ_API_KEY` from the secrets you created in Phase 2 (the `--set-secrets`
-line). You do **not** add them by hand on the Cloud Run service.
+`cloudbuild.yaml` already injects `MONGO_URI`, `GOOGLE_CLIENT_ID`,
+`GROQ_API_KEY`, and `LOGFIRE_TOKEN` from the secrets you created in Phase 2
+(the `--set-secrets` line). You do **not** add them by hand on the Cloud Run service.
 
 If a value is wrong or you rotated the DB password:
 

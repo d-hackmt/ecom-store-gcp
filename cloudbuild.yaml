@@ -29,7 +29,7 @@ steps:
       - '--timeout'
       - '300'
       - '--set-secrets'
-      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GROQ_API_KEY=GROQ_API_KEY:latest'
+      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GROQ_API_KEY=GROQ_API_KEY:latest,LOGFIRE_TOKEN=LOGFIRE_TOKEN:latest'
 
 images:
   - 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$COMMIT_SHA'

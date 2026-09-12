@@ -5,6 +5,7 @@ Single-product routes: add, list, get one, update, delete. Bulk ingestion
 import base64
 from typing import Optional
 
+import logfire
 from fastapi import APIRouter, Response, UploadFile, File, Form, HTTPException, Depends
 from bson import ObjectId
 from bson.errors import InvalidId
@@ -118,6 +119,11 @@ def delete_all_products(admin_email: str = Depends(require_admin)):
     Delete all products from the store.
     """
     result = products_collection.delete_many({})
+    logfire.warn(
+        "Admin wiped the entire product catalog: {count} products deleted by {admin}",
+        count=result.deleted_count,
+        admin=admin_email,
+    )
     return {"message": f"{result.deleted_count} products deleted"}
 
 
