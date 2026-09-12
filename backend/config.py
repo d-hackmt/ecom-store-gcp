@@ -71,9 +71,11 @@ class Settings(BaseSettings):
     logfire_api_key: str | None = None
 
     # Attach the live pydantic-evals evaluators to the agent (see
-    # backend/chatbot/online_evals.py). On here; the standalone chatbot POC
-    # ships the same agent.py with this turned off.
-    online_evals_enabled: bool = True
+    # backend/chatbot/online_evals.py) so every real chat gets scored in the
+    # background. Off by default — evals here run offline only, via
+    # `python -m backend.evals.chatbot_evals`. Set ONLINE_EVALS_ENABLED=true to
+    # turn this back on.
+    online_evals_enabled: bool = False
 
     @property
     def logfire_write_token(self) -> str | None:

@@ -16,7 +16,7 @@ sentence; it either chats back, or it fetches real products from the catalog.
 | **`search_products` tool** | plain Python + MongoDB | The one function the agent is allowed to call. Runs the query, returns matches. |
 | **Input guard** | two small Groq safety models | Checks the *incoming message* before the agent sees it. |
 | **Output guard** | one Groq safety model | Checks the *agent's reply* before the shopper sees it. |
-| **Online evaluation** | Pydantic Evals | In the background, scores the quality of real replies and sends the scores to Logfire. |
+| **Online evaluation** *(off by default)* | Pydantic Evals | If turned on, scores the quality of real replies in the background and sends the scores to Logfire. |
 
 ## The full flow
 
@@ -120,14 +120,29 @@ If `PORTKEY_API_KEY` is set, **all** of these calls are routed through the
 for extra logging and reliability. If it isn't set, the app calls Groq directly.
 Either way the behaviour is identical.
 
-## Online evaluation
+## Online evaluation (opt-in, off by default)
 
-`backend/chatbot/online_evals.py` attaches a few evaluators to the live agent.
-After each real chat, in the background (never slowing the shopper down), they
-score the reply — is it non‑empty? how long is it? and, on 30% of replies, an
-LLM judge rates whether it stayed on‑topic and didn't invent details. The
-scores stream to Logfire's *AI Evaluations → Live monitoring* view.
+`backend/chatbot/online_evals.py` defines a few evaluators that *can* be
+attached to the live agent — is the reply non‑empty? how long is it? and, on
+30% of replies, an LLM judge rating whether it stayed on‑topic and didn't
+invent details. Controlled by `settings.online_evals_enabled`
+(`ONLINE_EVALS_ENABLED` in `.env`/deploy config), which defaults to `false` —
+evals run offline only unless you explicitly turn this on. If you do, the
+scores stream to Logfire's *AI Evaluations → Live monitoring* view, so it also
+needs a real `LOGFIRE_TOKEN` to actually leave the process.
 
-There is also an **offline** suite, `backend/evals/chatbot_evals.py`, that runs
-a fixed set of example conversations against the real agent on demand
-(`python -m backend.evals.chatbot_evals`).
+## Offline evaluation
+
+The real eval suite here is `backend/evals/chatbot_evals.py` — a fixed,
+hand-written `Dataset` of 10 example conversations (greetings, product
+queries, prompt-injection attempts, rude-but-benign messages, etc.), each with
+its own pass/fail checks. Run it on demand:
+
+```bash
+python -m backend.evals.chatbot_evals
+```
+
+It hits the real agent, the real Groq models, and the real product database
+(needs a live `GROQ_API_KEY` and `MONGO_URI`) and prints a pass/fail report —
+nothing is mocked, and nothing needs to leave the process for you to see the
+results.
