@@ -9,11 +9,11 @@ are new:
 | # | Page | What it covers |
 |---|------|----------------|
 | 1 | [Overview](01-overview.md) | What the project is, the full technology stack, and why each piece is there |
-| 2 | [Architecture](02-architecture.md) | How all the parts fit together, the two ways to run it, and what happens on a request |
+| 2 | [Architecture](02-architecture.md) | How all the parts fit together, and what happens on a request |
 | 3 | [Frontend](03-frontend.md) | The storefront the shopper sees — how the pages, routing and state work |
-| 4 | [Backend](04-backend.md) | The API — every endpoint, and how it splits into a "reads" service and a "writes" service |
+| 4 | [Backend](04-backend.md) | The API — every endpoint, organized into read and write route modules |
 | 5 | [Database](05-database.md) | MongoDB's job, the four collections, and what a document in each looks like |
-| 6 | [Deployment](06-deployment.md) | Google Cloud: every GCP service used, the container images, and the automated deploy pipeline |
+| 6 | [Deployment](06-deployment.md) | Google Cloud: every GCP service used, the container image, and the automated deploy pipeline |
 | 7 | [Glossary](07-glossary.md) | Every technical term used in these docs, in one sentence each |
 
 ## The one-paragraph version

@@ -31,9 +31,5 @@ class Settings(BaseSettings):
     # --- Google Sign-In (public client id, not a secret) ---
     google_client_id: str = ""
 
-    # --- Deployment (only meaningful for the split ingestion/retrieval mode) ---
-    allowed_origins: str = "*"        # comma-separated CORS origins for the API services
-    ingestion_service_url: str = ""   # the retrieval service advertises this to the frontend
-
 
 settings = Settings()

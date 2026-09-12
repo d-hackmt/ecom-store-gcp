@@ -56,9 +56,8 @@ graph TD
 | **Google Sign‑In** | Google Identity Services + `google-auth` | The browser gets a signed token from Google; the backend verifies the signature. |
 | **Spreadsheet import** | openpyxl | Reads the `.xlsx` file in the admin bulk‑upload. |
 | **Containers** | Docker | Packages the app so it runs the same everywhere. |
-| **Hosting** | Google Cloud Run | Runs the containers; see [Deployment](06-deployment.md). |
-| **CI/CD** | GitHub Actions | On every push to `main`: run the tests, then build and deploy. |
-| **Tests** | pytest | Runs fully offline — every database call is faked. |
+| **Hosting** | Google Cloud Run | Runs the container; see [Deployment](06-deployment.md). |
+| **CI/CD** | Google Cloud Build | On every push: build the Docker image and deploy to Cloud Run. |
 
 ## What each external service is responsible for
 

@@ -1,7 +1,6 @@
 # Runtime dependencies for LUXE (store, no AI).
 #
-# Unpinned — install the current compatible versions. Dev / test extras live in
-# requirements-dev.txt.
+# Unpinned — install the current compatible versions.
 
 # --- Web framework ---
 fastapi

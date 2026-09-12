@@ -15,7 +15,7 @@ add to a cart, and check out with just an email.
 | **Storefront** | Plain JavaScript + CSS — served as-is, no build step |
 | **Backend** | FastAPI (Python) |
 | **Database** | MongoDB Atlas |
-| **Hosting** | Two containers on Google Cloud Run, deployed by GitHub Actions |
+| **Hosting** | Google Cloud Run (single container), deployed by Google Cloud Build |
 
 ## Features
 
@@ -44,29 +44,6 @@ python main.py
 
 Open <http://localhost:8000>. The interactive API reference is at
 <http://localhost:8000/docs>.
-
-### Run it the way production does (two services)
-
-```bash
-docker compose up
-# storefront + reads  → http://localhost:8000
-# writes              → http://localhost:8001
-```
-
-## Tests
-
-```bash
-uv pip install -r requirements-dev.txt   # adds pytest
-pytest
-```
-
-The suite runs **fully offline** — every database call is faked, so it is fast,
-free, and never touches Atlas. A pre-push git hook runs it automatically;
-activate it once after cloning:
-
-```bash
-git config core.hooksPath githooks
-```
 
 ## Documentation
 

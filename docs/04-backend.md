@@ -24,10 +24,7 @@ backend/
     mongo.py        small reusable query fragments (case-insensitive match)
     passwords.py    bcrypt hash / verify
     users.py        turn a user document into a safe public object (never leak the hash)
-main.py            the monolith entry point
-services/
-  ingestion/main.py   write-only entry point
-  retrieval/main.py   read-only entry point + serves the frontend
+main.py            the monolith entry point — mounts every route module
 ```
 
 ## Route modules — reads and writes side by side
@@ -45,16 +42,8 @@ def get_products(...): ...
 async def add_product(...): ...
 ```
 
-The three entry points then mount the halves they need:
-
-| Entry point | Mounts | Also serves |
-|-------------|--------|-------------|
-| `main.py` (monolith) | every `read_router` **and** `write_router` | the frontend, `GET /config` |
-| `services/retrieval/main.py` | every `read_router` | the frontend, `GET /config`, `GET /health` |
-| `services/ingestion/main.py` | every `write_router` | `GET /health` |
-
-This is why the same route function can be "the read service" in one deployment
-and "the monolith" in another with zero code duplication.
+`main.py` (the monolith, and only entry point on this branch) mounts every
+`read_router` **and** `write_router`, plus serves the frontend and `GET /config`.
 
 ## Every endpoint
 

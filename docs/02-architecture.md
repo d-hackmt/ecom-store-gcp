@@ -41,10 +41,7 @@ The backend's endpoints fall into two groups:
 Both groups are backed by the **same Python functions** in `backend/`. The
 split is only about *which endpoints are mounted where* — see the next section.
 
-## Two ways to run the exact same code
-
-The project ships **three** entry points. They import the identical route
-functions from `backend/routes/`; they differ only in which half they expose.
+## One entry point, reads and writes side by side
 
 ```mermaid
 flowchart LR
@@ -54,42 +51,20 @@ flowchart LR
     end
 
     shared --> M["main.py<br/><b>Monolith</b><br/>mounts read + write<br/>+ serves the frontend<br/>→ one process, port 8000"]
-    shared --> I["services/ingestion/main.py<br/><b>Ingestion service</b><br/>mounts write only<br/>→ port 8001"]
-    shared --> R["services/retrieval/main.py<br/><b>Retrieval service</b><br/>mounts read only<br/>+ serves the frontend<br/>→ port 8000"]
 ```
-
-### Mode A — Monolith (local development)
 
 ```bash
 python main.py
 ```
 
 One FastAPI process on **port 8000** that serves the frontend *and* every API
-endpoint. This is the simplest way to run the whole thing and is what the
-tests use. The frontend asks the backend where to send "write" requests (via a
+endpoint. The frontend asks the backend where to send "write" requests (via a
 tiny `GET /config` endpoint); the monolith answers "same place as everything
 else."
 
-### Mode B — Split services (production)
-
-```bash
-docker-compose up
-```
-
-Two FastAPI processes:
-
-| Service | Port | Serves | Why separate |
-|---------|------|--------|--------------|
-| **retrieval** | 8000 | the frontend + all read endpoints | Browsing is the heavy, bursty traffic. This service can scale up on its own. |
-| **ingestion** | 8001 | all write endpoints | Writes are rarer and can scale independently. |
-
-Both containers share the **same MongoDB database** — there is no data split,
-only an API split. The frontend (served by *retrieval*) is told the *ingestion*
-service's address at deploy time and sends every write there.
-
 > New endpoints are added in one place: a decorator on `read_router` or
-> `write_router` inside the relevant `backend/routes/*.py` module. All three
-> entry points pick it up automatically.
+> `write_router` inside the relevant `backend/routes/*.py` module — `main.py`
+> mounts both automatically.
 
 ## Identity — how the app knows who you are
 

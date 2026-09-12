@@ -42,13 +42,12 @@ Every technical term used in these docs, one sentence each.
 |------|---------|
 | **Docker** | Packages an app plus its dependencies into an **image** that runs the same on any machine. |
 | **Image** | The packaged, ready‑to‑run snapshot of the app; a running copy of an image is a **container**. |
-| **`docker-compose`** | Runs several containers together with one command; used here for local split‑services mode. |
 | **Uvicorn** | The program that actually serves a FastAPI app over HTTP. |
 | **CI/CD** | Continuous Integration / Continuous Deployment — automation that tests and ships code on every push. |
-| **GitHub Actions** | GitHub's built‑in CI/CD runner; this project's pipeline lives in `.github/workflows/cicd.yaml`. |
+| **Google Cloud Build** | Google Cloud's build automation service; this project's pipeline lives in `cloudbuild.yaml` and runs on every push to build the image and deploy it. |
 | **Google Cloud Run** | A Google Cloud service that runs a container image on demand, gives it an HTTPS URL, and scales it (including to zero). |
 | **Artifact Registry** | Google Cloud's private store for Docker images. |
-| **Workload Identity Federation** | A way for an outside system (GitHub Actions) to authenticate to Google Cloud using short‑lived tokens instead of a stored key. |
+| **Secret Manager** | Google Cloud's store for sensitive values (`MONGO_URI`, `GOOGLE_CLIENT_ID`); `cloudbuild.yaml` injects them into the container at deploy time. |
 | **Service account** | A non‑human Google Cloud identity that automation acts as; it is granted specific roles. |
 | **IAM** | Google Cloud's "who can do what" system — identities, roles and permissions. |
 
