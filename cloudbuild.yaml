@@ -1,11 +1,11 @@
 steps:
   # 1. Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$COMMIT_SHA', '.']
-    
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$BUILD_ID', '.']
+
   # 2. Push the image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$COMMIT_SHA']
+    args: ['push', 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$BUILD_ID']
 
   # 3. Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -15,9 +15,11 @@ steps:
       - 'deploy'
       - 'main-app'
       - '--image'
-      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$COMMIT_SHA'
+      - 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$BUILD_ID'
       - '--region'
       - 'asia-south1'
+      - '--service-account'
+      - 'fde-deployer@$PROJECT_ID.iam.gserviceaccount.com'
       - '--allow-unauthenticated'
       - '--port'
       - '8000'
@@ -29,10 +31,10 @@ steps:
       - '--timeout'
       - '300'
       - '--set-secrets'
-      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GROQ_API_KEY=GROQ_API_KEY:latest,LOGFIRE_TOKEN=LOGFIRE_TOKEN:latest'
+      - 'MONGO_URI=MONGO_URI:latest,GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID:latest,GROQ_API_KEY=GROQ_API_KEY:latest,LOGFIRE_TOKEN=LOGFIRE_TOKEN:latest,PORTKEY_API_KEY=PORTKEY_API_KEY:latest,PORTKEY_GROQ_PROVIDER=PORTKEY_GROQ_PROVIDER:latest'
 
 images:
-  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$COMMIT_SHA'
+  - 'asia-south1-docker.pkg.dev/$PROJECT_ID/main-repo/main-app:$BUILD_ID'
 
 options:
   logging: CLOUD_LOGGING_ONLY

@@ -1,10 +1,13 @@
 # Build the Application
 FROM python:3.11-slim
 WORKDIR /app
-  
+
+# uv — fast Python package installer (astral.sh/uv)
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # Install backend dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv pip install --system --no-cache -r requirements.txt
 
 # Copy source code (Backend + Frontend natively)
 COPY . .
